@@ -1,4 +1,5 @@
 import LikeButton from './like-button';
+import {List, ListItemButton, Typography} from "@mui/material";
 
 function Header({ title }) {
     return <h1>{title ? title : 'Default title'}</h1>;
@@ -9,12 +10,12 @@ export default function HomePage() {
 
     return (
         <div>
-            <Header title="Develop. Preview. Ship." />
-            <ul>
+            <Typography variant="h1">Develop. Preview. Ship.</Typography>
+            <List>
                 {names.map((name) => (
-                    <li key={name}>{name}</li>
+                    <ListItemButton key={name}>{name}</ListItemButton>
                 ))}
-            </ul>
+            </List>
             <LikeButton />
         </div>
     );
