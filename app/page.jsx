@@ -1,4 +1,4 @@
-import LikeButton from './like-button';
+import LikeButton from './ui/like-button';
 import {List, ListItemButton, Typography} from "@mui/material";
 
 function Header({ title }) {
