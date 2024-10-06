@@ -1,5 +1,3 @@
-import LikeButton from './ui/like-button';
-import {List, ListItemButton, Typography} from "@mui/material";
 import {redirect} from "next/navigation";
 
 function Header({ title }) {
