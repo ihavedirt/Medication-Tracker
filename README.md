@@ -9,11 +9,15 @@ Project description
 ```bash
 npm install
 ```
-2. Run development script
+2. Copy ```.env``` file
+```bash
+cp .env.example .env.local
+```
+3. Run development script
 ```bash
 npm run dev
 ```
-3. Navigate to provided URL. Likely http://localhost:3000
+4. Navigate to provided URL. Likely http://localhost:3000
 
 ## Usage
 
