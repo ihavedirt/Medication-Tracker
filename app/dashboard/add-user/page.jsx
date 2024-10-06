@@ -1,3 +1,5 @@
+import {Typography} from "@mui/material";
+
 export default function Page() {
-    return <p>Add User Page</p>;
+    return <Typography>Add User Page</Typography>;
 }
