@@ -2,8 +2,6 @@ import {AppProvider} from "@toolpad/core";
 import {AppRouterCacheProvider} from "@mui/material-nextjs/v13-appRouter";
 import MedicationIcon from '@mui/icons-material/Medication';
 import PersonIcon from '@mui/icons-material/Person';
-import {PageContainer} from "@toolpad/core/PageContainer";
-import {DashboardLayout} from "@toolpad/core/DashboardLayout";
 import Image from 'next/image';
 import * as React from "react";
 import {Dashboard} from "@mui/icons-material";
@@ -16,7 +14,7 @@ export const NAVIGATION = [
     },
     {
         segment: 'dashboard/add-medication',
-        title: 'Add User',
+        title: 'Add Medication',
         icon: <MedicationIcon/>,
     },
     {
@@ -35,9 +33,7 @@ export default function RootLayout({ children }) {
                     logo: <Image src="/neohand.png" alt="Pocket Pills Logo" width={72} height={144} />,
                     title: 'Pocket Pills',
                 }} navigation={NAVIGATION}>
-                    <DashboardLayout>
-                        <PageContainer>{children}</PageContainer>
-                    </DashboardLayout>
+                    {children}
                 </AppProvider>
               </AppRouterCacheProvider>
           </body>
