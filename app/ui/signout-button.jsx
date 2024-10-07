@@ -6,7 +6,7 @@ import * as React from "react";
 
 export default function SignOutButton() {
     return (
-        <Button onClick={() => {
+        <Button variant="contained" onClick={() => {
             signout();
         }}>Sign Out</Button>
     );
