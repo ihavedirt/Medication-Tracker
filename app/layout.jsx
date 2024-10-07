@@ -1,4 +1,4 @@
-import {AppProvider} from "@toolpad/core";
+import {AppProvider} from "@toolpad/core/AppProvider";
 import {AppRouterCacheProvider} from "@mui/material-nextjs/v13-appRouter";
 import MedicationIcon from '@mui/icons-material/Medication';
 import PersonIcon from '@mui/icons-material/Person';
