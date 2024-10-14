@@ -13,6 +13,8 @@ import {
 import Grid from '@mui/material/Grid2';
 import {useState} from "react";
 import Button from "@mui/material/Button";
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import dayjs from "dayjs";
 
 export const DosageUnit = {
     ML: 0,
@@ -32,6 +34,7 @@ export default function Page() {
     const [unit, setUnit] = useState('');
     const [type, setType] = useState('');
     const [name, setName] = useState('');
+    const [time, setTime] = useState(dayjs());
 
 
     const handleUnitChange = (event) => {
@@ -45,6 +48,9 @@ export default function Page() {
     }
     const handleSubmit = () => {
         console.log({unit, type, name});
+    }
+    const handleTime = (value) => {
+        setTime(value);
     }
 
 
@@ -80,7 +86,11 @@ export default function Page() {
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
-
+                <TimePicker
+                    label="Time of day"
+                    value={time}
+                    onChange={handleTime}
+                />
             </Grid>
             <Button variant="contained" onClick={handleSubmit}>Submit</Button>
         </Stack>
