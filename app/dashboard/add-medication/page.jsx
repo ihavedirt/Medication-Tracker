@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import {
     Container,
     Divider,
@@ -8,91 +8,148 @@ import {
     Select,
     Stack,
     TextField,
-    Typography
+    Typography,
+    Button
 } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import {useState} from "react";
-import Button from "@mui/material/Button";
+import { useState, useMemo } from "react";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 
-export const DosageUnit = {
-    ML: 0,
-    L: 1,
-    MG: 2,
-    G: 3,
-    KG: 4
-};
-
-export const MedType = {
-    PILL: 0,
-    SYRUP: 1,
-    INJECTION: 2,
-};
-
 export default function Page() {
-    const [unit, setUnit] = useState('');
-    const [type, setType] = useState('');
-    const [name, setName] = useState('');
-    const [time, setTime] = useState(dayjs());
+    const DosageUnit = useMemo(() => ({
+        ML: 0,
+        L: 1,
+        MG: 2,
+        G: 3,
+        KG: 4,
+    }), []);
+    
+    const MedType = useMemo(() => ({
+        PILL: 0,
+        SYRUP: 1,
+        INJECTION: 2,
+    }), []);
+    
+    const Frequency = useMemo(() => ({
+        ONCE_DAILY: 0,
+        TWICE_DAILY: 1,
+        THREE_DAILY: 2,
+        FOUR_DAILY: 3,
+        EVERY_6: 4,
+        EVERY_8: 5,
+        EVERY_12: 7,
+        WEEKLY: 8,
+        MONTHLY: 9,
+        AS_NEEDED: 10,
+    }), []);
 
+    const [formData, setFormData] = useState({
+        name: '',
+        unit: DosageUnit.MG,
+        type: MedType.PILL,
+        frequency: Frequency.ONCE_DAILY,
+        time: dayjs()
+    });
 
-    const handleUnitChange = (event) => {
-        setUnit(event.target.value);
-    }
-    const handleTypeChange = (event) => {
-        setType(event.target.value);
-    }
-    const handleNameChange = (event) => {
-        setName(event.target.value);
-    }
+    const [errorData, setErrorData] = useState({
+        name: false,
+        unit: false,
+        type: false,
+        frequency: false,
+        time: dayjs()
+    });
+
+    const handleChange = (field) => (event) => {
+        const value = event.target ? event.target.value : event;
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
     const handleSubmit = () => {
-        console.log({unit, type, name});
-    }
-    const handleTime = (value) => {
-        setTime(value);
-    }
+        if(name == '') {
+            setErrorData({
+                ...errorData,
+                name: true
+            });
+            return;
+        }
+        console.log(formData);
+    };
 
+    const renderSelectField = (label, value, onChange, items) => (
+        <FormControl variant="filled" fullWidth>
+            <InputLabel>{label}</InputLabel>
+            <Select value={value} onChange={onChange} variant="filled">
+                {items.map((item, index) => (
+                    <MenuItem key={index} value={item.value}>
+                        {item.label}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+    );
 
     return (
         <Stack spacing={2}>
             <Typography variant="h4">Medication Entry</Typography>
-            <Divider/>
+            <Divider />
             <Grid container spacing={1}>
                 <Grid xs={12}>
-                    <TextField id="filled-basic" label="Medication Name" variant="filled" onChange={handleNameChange}/>
+                    <TextField
+                        error={errorData.name}
+                        label="Medication Name"
+                        variant="filled"
+                        value={formData.name}
+                        onChange={handleChange('name')}
+                        fullWidth
+                        helperText="A medication name is required"
+                    />
                 </Grid>
                 <Grid xs={12}>
-                    <FormControl variant="filled" fullWidth>
-                        <InputLabel id="unit-select-label">Unit</InputLabel>
-                        <Select defaultValue={DosageUnit.MG} labelId="unit-select-label" onChange={handleUnitChange} variant='filled'>
-                            <MenuItem value={DosageUnit.ML}>mL</MenuItem>
-                            <MenuItem value={DosageUnit.L}>L</MenuItem>
-                            <MenuItem value={DosageUnit.MG}>mg</MenuItem>
-                            <MenuItem value={DosageUnit.G}>g</MenuItem>
-                            <MenuItem value={DosageUnit.KG}>kg</MenuItem>
-                        </Select>
-                    </FormControl>
+                    {renderSelectField('Unit', formData.unit, handleChange('unit'), [
+                        { label: 'mL', value: DosageUnit.ML },
+                        { label: 'L', value: DosageUnit.L },
+                        { label: 'mg', value: DosageUnit.MG },
+                        { label: 'g', value: DosageUnit.G },
+                        { label: 'kg', value: DosageUnit.KG },
+                    ])}
                 </Grid>
                 <Grid xs={12}>
-                    <FormControl variant="filled" fullWidth>
-                        <InputLabel id="type-select-label">Type</InputLabel>
-                        <Select defaultValue={MedType.PILL} labelId="type-select-label" onChange={handleTypeChange} variant='filled' >
-                            <MenuItem value={MedType.PILL}>Pill</MenuItem>
-                            <MenuItem value={MedType.INJECTION}>Injection</MenuItem>
-                            <MenuItem value={MedType.SYRUP}>Syrup</MenuItem>
-                        </Select>
-                    </FormControl>
+                    {renderSelectField('Type', formData.type, handleChange('type'), [
+                        { label: 'Pill', value: MedType.PILL },
+                        { label: 'Injection', value: MedType.INJECTION },
+                        { label: 'Syrup', value: MedType.SYRUP },
+                    ])}
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
-                <TimePicker
-                    label="Time of day"
-                    value={time}
-                    onChange={handleTime}
-                />
+                <Grid xs={12}>
+                    {renderSelectField('Frequency', formData.frequency, handleChange('frequency'), [
+                        { label: 'Once Daily', value: Frequency.ONCE_DAILY },
+                        { label: 'Twice Daily', value: Frequency.TWICE_DAILY },
+                        { label: 'Three Times Daily', value: Frequency.THREE_DAILY },
+                        { label: 'Four Times Daily', value: Frequency.FOUR_DAILY },
+                        { label: 'Every 6 Hours', value: Frequency.EVERY_6 },
+                        { label: 'Every 8 Hours', value: Frequency.EVERY_8 },
+                        { label: 'Every 12 Hours', value: Frequency.EVERY_12 },
+                        { label: 'Weekly', value: Frequency.WEEKLY },
+                        { label: 'Monthly', value: Frequency.MONTHLY },
+                        { label: 'As Needed', value: Frequency.AS_NEEDED },
+                    ])}
+                </Grid>
+                {formData.frequency != Frequency.AS_NEEDED ? 
+                    <Grid xs={12}>
+                        <TimePicker
+                            label="Medication time"
+                            value={formData.time}
+                            onChange={handleChange('time')}
+                        />
+                    </Grid> 
+                : null}
             </Grid>
-            <Button variant="contained" onClick={handleSubmit}>Submit</Button>
+            <Button variant="contained" onClick={handleSubmit}>
+                Submit
+            </Button>
         </Stack>
     );
 }
