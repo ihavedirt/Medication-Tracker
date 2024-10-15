@@ -46,19 +46,23 @@ export default function Page() {
 
     const [formData, setFormData] = useState({
         name: '',
+        doseage: 0,
         unit: DosageUnit.MG,
         type: MedType.PILL,
         frequency: Frequency.ONCE_DAILY,
         time: dayjs()
     });
 
-    const [errorData, setErrorData] = useState({
+    const errorDefault = {
         name: false,
+        doseage: false,
         unit: false,
         type: false,
         frequency: false,
-        time: dayjs()
-    });
+        time: false
+    };
+
+    const [errorData, setErrorData] = useState(errorDefault);
 
     const handleChange = (field) => (event) => {
         const value = event.target ? event.target.value : event;
@@ -66,13 +70,20 @@ export default function Page() {
     };
 
     const handleSubmit = () => {
-        if(name == '') {
+        const newErrorData = {
+            name: formData.name === '',
+            doseage: !Number.isFinite(Number(formData.doseage)) || formData.doseage <= 0,
+        };
+    
+        if (newErrorData.name || newErrorData.doseage) {
             setErrorData({
                 ...errorData,
-                name: true
+                ...newErrorData,
             });
             return;
         }
+    
+        setErrorData(errorDefault);
         console.log(formData);
     };
 
@@ -106,19 +117,32 @@ export default function Page() {
                     />
                 </Grid>
                 <Grid xs={12}>
+                    {renderSelectField('Type', formData.type, handleChange('type'), [
+                        { label: 'Pill', value: MedType.PILL },
+                        { label: 'Injection', value: MedType.INJECTION },
+                        { label: 'Syrup', value: MedType.SYRUP },
+                    ])}
+                </Grid>
+            </Grid>
+            <Grid container spacing={1}>
+                <Grid xs={12}>
+                    <TextField
+                            error={errorData.doseage}
+                            label="Doseage"
+                            variant="filled"
+                            value={formData.doseage}
+                            onChange={handleChange('doseage')}
+                            fullWidth
+                            helperText="A dosage is required"
+                    />
+                </Grid>
+                <Grid xs={12}>
                     {renderSelectField('Unit', formData.unit, handleChange('unit'), [
                         { label: 'mL', value: DosageUnit.ML },
                         { label: 'L', value: DosageUnit.L },
                         { label: 'mg', value: DosageUnit.MG },
                         { label: 'g', value: DosageUnit.G },
                         { label: 'kg', value: DosageUnit.KG },
-                    ])}
-                </Grid>
-                <Grid xs={12}>
-                    {renderSelectField('Type', formData.type, handleChange('type'), [
-                        { label: 'Pill', value: MedType.PILL },
-                        { label: 'Injection', value: MedType.INJECTION },
-                        { label: 'Syrup', value: MedType.SYRUP },
                     ])}
                 </Grid>
             </Grid>
