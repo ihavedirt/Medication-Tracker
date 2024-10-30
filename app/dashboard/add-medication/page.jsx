@@ -1,6 +1,5 @@
 'use client';
 import {
-    Container,
     Divider,
     FormControl,
     InputLabel,
@@ -95,8 +94,6 @@ export default function Page() {
     
         setErrorData(errorDefault);
 
-        // const time = new Date(formData.time);
-        // time.setSeconds(0, 0);
         formData.time = formData.time.set('seconds', 0).set('milliseconds', 0);
     
         const { error } = await supabase.from("medications").insert({
