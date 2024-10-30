@@ -12,11 +12,14 @@ import {
     Button
 } from "@mui/material";
 import Grid from '@mui/material/Grid2';
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
+import { createClient } from '../../../utils/supabase/client';
+
 
 export default function Page() {
+    const supabase = createClient();
     const DosageUnit = useMemo(() => ({
         ML: 0,
         L: 1,
@@ -63,13 +66,20 @@ export default function Page() {
     };
 
     const [errorData, setErrorData] = useState(errorDefault);
+    const [mysession, setMySession] = useState();
 
     const handleChange = (field) => (event) => {
         const value = event.target ? event.target.value : event;
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = () => {
+    useEffect (() => {
+        supabase.auth.getUser().then((session) => {
+          setMySession(session);
+        });
+      }, [])
+
+    const handleSubmit = async () => {
         const newErrorData = {
             name: formData.name === '',
             doseage: !Number.isFinite(Number(formData.doseage)) || formData.doseage <= 0,
@@ -84,7 +94,21 @@ export default function Page() {
         }
     
         setErrorData(errorDefault);
-        console.log(formData);
+
+        // const time = new Date(formData.time);
+        // time.setSeconds(0, 0);
+        formData.time = formData.time.set('seconds', 0).set('milliseconds', 0);
+    
+        const { error } = await supabase.from("medications").insert({
+            uuid: mysession.data.user.id,
+            name: formData.name,
+            dose: formData.doseage,
+            unit: formData.unit,
+            type: formData.type,
+            frequency: formData.frequency,
+            medication_time: formData.time.toISOString(),
+        });
+        console.log(error);
     };
 
     const renderSelectField = (label, value, onChange, items) => (
