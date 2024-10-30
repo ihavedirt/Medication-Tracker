@@ -14,7 +14,6 @@ import {
 } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import { useState, useMemo, useEffect } from "react";
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -22,20 +21,17 @@ import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 
 export default function Page() {
     const supabase = createClient();
-    
+
     const formDefault = {
-        firstName: '',
-        lastName: '',
-        birthDate: dayjs()
+        first_name: '',
+        last_name: '',
+        birth_date: dayjs()
     };
 
     const errorDefault = {
-        name: false,
-        doseage: false,
-        unit: false,
-        type: false,
-        frequency: false,
-        time: false
+        first_name: false,
+        last_name: false,
+        birth_date: false
     };
 
     const [formData, setFormData] = useState(formDefault);
@@ -53,6 +49,11 @@ export default function Page() {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    // Handle date change
+    const handleDateChange = (newDate) => {
+        setFormData((prev) => ({ ...prev, birth_date: newDate}));
+    };
+
     useEffect (() => {
         supabase.auth.getUser().then((session) => {
           setMySession(session);
@@ -60,35 +61,35 @@ export default function Page() {
       }, [])
 
     const handleSubmit = async () => {
+        
         const newErrorData = {
-            name: formData.name === '',
-            doseage: !Number.isFinite(Number(formData.doseage)) || formData.doseage <= 0,
+            first_name: formData.first_name === '',
+            last_name: formData.last_name === '',
+            birth_date: !dayjs(formData.birth_date).isValid() || dayjs(formData.birth_date).isAfter(dayjs(), 'day')
         };
-    
-        if (newErrorData.name || newErrorData.doseage) {
+        
+        if (newErrorData.first_name || newErrorData.last_name || newErrorData.birth_date) {
             setErrorData({
-                ...errorData,
-                ...newErrorData,
+                first_name: newErrorData.first_name,
+                last_name: newErrorData.last_name,
+                birth_date: newErrorData.birth_date ? "Please enter a valid birth date." : false,
             });
             return;
         }
-    
-        setErrorData(errorDefault);
 
-        formData.time = formData.time.set('seconds', 0).set('milliseconds', 0);
-    
+        const formattedBirthDate = dayjs(formData.birth_date).format('YYYY-MM-DD');
+        setErrorData(errorDefault);
         setLoading(true);
-        const { error } = await supabase.from("medications").insert({
+
+        const { error } = await supabase.from("subprofiles").insert({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            birth_date: formattedBirthDate, // Use formatted date
             uuid: mysession.data.user.id,
-            name: formData.name,
-            dose: formData.doseage,
-            unit: formData.unit,
-            type: formData.type,
-            frequency: formData.frequency,
-            medication_time: formData.time.toISOString(),
         });
+
         setLoading(false);
-        
+
         if(error) {
             setSnackbarSev({
                 message: "An error occurred",
@@ -105,19 +106,6 @@ export default function Page() {
         setFormData(formDefault);
     };
 
-    const renderSelectField = (label, value, onChange, items) => (
-        <FormControl variant="filled" fullWidth>
-            <InputLabel>{label}</InputLabel>
-            <Select value={value} onChange={onChange} variant="filled">
-                {items.map((item, index) => (
-                    <MenuItem key={index} value={item.value}>
-                        {item.label}
-                    </MenuItem>
-                ))}
-            </Select>
-        </FormControl>
-    );
-
     const handleClose = () => {
         setSnackbarOpen(false);
     }
@@ -129,32 +117,35 @@ export default function Page() {
             <Grid container spacing={2}>
                 <Grid xs={12}>
                     <TextField
-                        error={errorData.firstName}
+                        error={errorData.first_name}
                         label="First Name"
                         variant="filled"
-                        value={formData.firstName}
-                        onChange={handleChange('firstName')}
+                        value={formData.first_name}
+                        onChange={handleChange('first_name')}
                         fullWidth
-                        helperText="Please enter first name"
+                        helperText={errorData.first_name ? "Please enter first name" : ""}
                     />
                 </Grid>
                 <Grid xs={12}>
                 <TextField
-                        error={errorData.lastName}
+                        error={errorData.last_name}
                         label="Last Name"
                         variant="filled"
-                        value={formData.lastName}
-                        onChange={handleChange('lastName')}
+                        value={formData.last_name}
+                        onChange={handleChange('last_name')}
                         fullWidth
-                        helperText="Please enter last name"
+                        helperText={errorData.last_name ? "Please enter last name" : ""}
                     />
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
                 <Grid xs={12}>
                 <DatePicker
-                    label = "Birth date"
+                    label = "Date of Birth"
+                    value = {formData.birth_date} // Bind DatePicker value
+                    onChange = {handleDateChange}
                     defaultValue = {dayjs()}
+                    disableFuture
                     slots = {{ openPickerIcon: InsertInvitationIcon}}
                 />
                 </Grid>
