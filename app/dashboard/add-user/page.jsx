@@ -17,44 +17,16 @@ import { useState, useMemo, useEffect } from "react";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
-
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
 
 export default function Page() {
     const supabase = createClient();
-    const DosageUnit = useMemo(() => ({
-        ML: 0,
-        L: 1,
-        MG: 2,
-        G: 3,
-        KG: 4,
-    }), []);
     
-    const MedType = useMemo(() => ({
-        PILL: 0,
-        SYRUP: 1,
-        INJECTION: 2,
-    }), []);
-    
-    const Frequency = useMemo(() => ({
-        ONCE_DAILY: 0,
-        TWICE_DAILY: 1,
-        THREE_DAILY: 2,
-        FOUR_DAILY: 3,
-        EVERY_6: 4,
-        EVERY_8: 5,
-        EVERY_12: 7,
-        WEEKLY: 8,
-        MONTHLY: 9,
-        AS_NEEDED: 10,
-    }), []);
-
     const formDefault = {
-        name: '',
-        doseage: 0,
-        unit: DosageUnit.MG,
-        type: MedType.PILL,
-        frequency: Frequency.ONCE_DAILY,
-        time: dayjs()
+        firstName: '',
+        lastName: '',
+        birthDate: dayjs()
     };
 
     const errorDefault = {
@@ -70,7 +42,7 @@ export default function Page() {
     const [errorData, setErrorData] = useState(errorDefault);
     const [mysession, setMySession] = useState();
     const [snackbarSev, setSnackbarSev] = useState({
-        message: "Successfully submitted medication info!",
+        message: "Successfully created user profile!",
         severity: "success"
     });
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -154,76 +126,48 @@ export default function Page() {
         <Stack spacing={2}>
             <Typography variant="h4">Create Subprofile</Typography>
             <Divider />
-            <Grid container spacing={1}>
+            <Grid container spacing={2}>
                 <Grid xs={12}>
                     <TextField
-                        error={errorData.name}
-                        label="Medication Name"
+                        error={errorData.firstName}
+                        label="First Name"
                         variant="filled"
-                        value={formData.name}
-                        onChange={handleChange('name')}
+                        value={formData.firstName}
+                        onChange={handleChange('firstName')}
                         fullWidth
-                        helperText="A medication name is required"
+                        helperText="Please enter first name"
                     />
                 </Grid>
                 <Grid xs={12}>
-                    {renderSelectField('Type', formData.type, handleChange('type'), [
-                        { label: 'Pill', value: MedType.PILL },
-                        { label: 'Injection', value: MedType.INJECTION },
-                        { label: 'Syrup', value: MedType.SYRUP },
-                    ])}
+                <TextField
+                        error={errorData.lastName}
+                        label="Last Name"
+                        variant="filled"
+                        value={formData.lastName}
+                        onChange={handleChange('lastName')}
+                        fullWidth
+                        helperText="Please enter last name"
+                    />
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
                 <Grid xs={12}>
-                    <TextField
-                            error={errorData.doseage}
-                            label="Doseage"
-                            variant="filled"
-                            value={formData.doseage}
-                            onChange={handleChange('doseage')}
-                            fullWidth
-                            helperText="A dosage is required"
-                    />
-                </Grid>
-                <Grid xs={12}>
-                    {renderSelectField('Unit', formData.unit, handleChange('unit'), [
-                        { label: 'mL', value: DosageUnit.ML },
-                        { label: 'L', value: DosageUnit.L },
-                        { label: 'mg', value: DosageUnit.MG },
-                        { label: 'g', value: DosageUnit.G },
-                        { label: 'kg', value: DosageUnit.KG },
-                    ])}
+                <DatePicker
+                    label = "Birth date"
+                    defaultValue = {dayjs()}
+                    slots = {{ openPickerIcon: InsertInvitationIcon}}
+                />
                 </Grid>
             </Grid>
+            
             <Grid container spacing={1}>
                 <Grid xs={12}>
-                    {renderSelectField('Frequency', formData.frequency, handleChange('frequency'), [
-                        { label: 'Once Daily', value: Frequency.ONCE_DAILY },
-                        { label: 'Twice Daily', value: Frequency.TWICE_DAILY },
-                        { label: 'Three Times Daily', value: Frequency.THREE_DAILY },
-                        { label: 'Four Times Daily', value: Frequency.FOUR_DAILY },
-                        { label: 'Every 6 Hours', value: Frequency.EVERY_6 },
-                        { label: 'Every 8 Hours', value: Frequency.EVERY_8 },
-                        { label: 'Every 12 Hours', value: Frequency.EVERY_12 },
-                        { label: 'Weekly', value: Frequency.WEEKLY },
-                        { label: 'Monthly', value: Frequency.MONTHLY },
-                        { label: 'As Needed', value: Frequency.AS_NEEDED },
-                    ])}
+                    <Button variant="contained" onClick={handleSubmit} disabled={loading}>
+                        Create Profile
+                    </Button>
                 </Grid>
-                {formData.frequency != Frequency.AS_NEEDED ? 
-                    <Grid xs={12}>
-                        <TimePicker
-                            label="Medication time"
-                            value={formData.time}
-                            onChange={handleChange('time')}
-                        />
-                    </Grid> 
-                : null}
             </Grid>
-            <Button variant="contained" onClick={handleSubmit} disabled={loading}>
-                Submit
-            </Button>
+            
             <Snackbar
                 open={snackbarOpen}
                 autoHideDuration={6000}
@@ -238,6 +182,7 @@ export default function Page() {
                     {snackbarSev.message}
                 </Alert>
             </Snackbar>
+            
         </Stack>
     );
 }
