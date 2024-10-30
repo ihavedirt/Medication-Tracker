@@ -77,6 +77,7 @@ export default function Page() {
     const [mysession, setMySession] = useState();
     const [medicineData, setMedicineData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [userData, setUserData] = useState([]);
 
     useEffect (() => {
         supabase.auth.getUser().then((session) => {
@@ -92,7 +93,7 @@ export default function Page() {
         .select()
         .eq('uuid', mysession.data.user.id);
     
-
+    setUserData(userData || []);
     console.log('User Data:', userData);
 
     const { data: medicineData, error: medicineError} = await supabase
@@ -103,32 +104,56 @@ export default function Page() {
     setMedicineData(medicineData || []);
     console.log('Medicine Data:', medicineData);
     setLoading(false);
-    
+
     }
+
+    const renderMedicineTables = () => {
+        const tables = [];
+
+        userData.forEach((user) =>  {
+            const userUUID = user.uuid;
+            const userSubProfileID = user.id;
+
+            medicineData.forEach((medicineEntry) => {
+                if (medicineEntry.uuid === userUUID && medicineEntry.subprofile_id === userSubProfileID) {
+                    tables.push(
+                        <TableContainer component={Paper} key={medicineEntry.subprofile_id}>
+                            <Typography variant="h6">Poop: {medicineEntry.subprofile_id}</Typography>
+                            <Table>
+                            <TableHead>
+                                <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Dose</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <TableRow>
+                                <TableCell>{medicineEntry.name}</TableCell>
+                                <TableCell>{medicineEntry.dose || 'N/A'}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )
+                }
+            })
+        })
+        return tables;
+    }
+    
+
     return (
         <Stack spacing={2}>
-            {/* <Typography>View User Page</Typography> */}
-            {medicineData
-            .filter((medicineEntry) => medicineEntry.subprofile_id == 1)
-            .map((medicineEntry) => (
-                <TableContainer component={Paper} key={medicineEntry.subprofile_id}>
-                <Typography variant="h6">Poop: {medicineEntry.subprofile_id}</Typography>
-                <Table>
-                <TableHead>
-                    <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Dose</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    <TableRow>
-                    <TableCell>{medicineEntry.name}</TableCell>
-                    <TableCell>{medicineEntry.dose || 'N/A'}</TableCell>
-                    </TableRow>
-                </TableBody>
-                </Table>
-            </TableContainer>
-            ))}
+            <Divider />
+            {(() => {
+                const tables = renderMedicineTables();
+                if (tables.length > 0 ) {
+                    return tables;
+                }
+                else {
+                    return <Typography>Could not find user </Typography>
+                }
+            })()}
             <Divider />
             <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                 Submit
