@@ -98,7 +98,7 @@ export default function Page() {
         }
         else {
             setSnackbarSev({
-                message: "Successfully submitted medication info!",
+                message: "Successfully created subprofile!",
                 severity: "success"
             });
         }
