@@ -17,6 +17,15 @@ import { useState, useMemo, useEffect } from "react";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
+import * as React from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+
 
 export default function Page() {
     const supabase = createClient();
@@ -66,6 +75,7 @@ export default function Page() {
     };
 
     const [mysession, setMySession] = useState();
+    const [medicineData, setMedicineData] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect (() => {
@@ -90,13 +100,35 @@ export default function Page() {
         .select()
         .eq('uuid', mysession.data.user.id);
     
+    setMedicineData(medicineData || []);
     console.log('Medicine Data:', medicineData);
     setLoading(false);
-
+    
     }
     return (
         <Stack spacing={2}>
-            <Typography>View User Page</Typography>
+            {/* <Typography>View User Page</Typography> */}
+            {medicineData
+            .filter((medicineEntry) => medicineEntry.subprofile_id == 1)
+            .map((medicineEntry) => (
+                <TableContainer component={Paper} key={medicineEntry.subprofile_id}>
+                <Typography variant="h6">Poop: {medicineEntry.subprofile_id}</Typography>
+                <Table>
+                <TableHead>
+                    <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Dose</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    <TableRow>
+                    <TableCell>{medicineEntry.name}</TableCell>
+                    <TableCell>{medicineEntry.dose || 'N/A'}</TableCell>
+                    </TableRow>
+                </TableBody>
+                </Table>
+            </TableContainer>
+            ))}
             <Divider />
             <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                 Submit
