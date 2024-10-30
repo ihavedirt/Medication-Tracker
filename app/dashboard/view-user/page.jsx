@@ -77,22 +77,23 @@ export default function Page() {
     const handleSubmit = async() => {
 
     setLoading(true);
-    console.log(mysession.data.user.id);
-    const { data, error} = await supabase
+    const { data: userData, error: userError} = await supabase
         .from('subprofiles')
         .select()
         .eq('uuid', mysession.data.user.id);
+    
+
+    console.log('User Data:', userData);
+
+    const { data: medicineData, error: medicineError} = await supabase
+        .from('medications')
+        .select()
+        .eq('uuid', mysession.data.user.id);
+    
+    console.log('Medicine Data:', medicineData);
     setLoading(false);
 
-    console.log('User Data:', data);
-    //console.error('User Error:', error); // Log error if it exists
-
-    // const { data, error } = await supabase
-    //     .from('medications')
-    //     .select("*")
-    //     .eq()
     }
-
     return (
         <Stack spacing={2}>
             <Typography>View User Page</Typography>
