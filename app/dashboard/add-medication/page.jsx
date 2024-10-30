@@ -1,10 +1,12 @@
 'use client';
 import {
+    Alert,
     Divider,
     FormControl,
     InputLabel,
     MenuItem,
     Select,
+    Snackbar,
     Stack,
     TextField,
     Typography,
@@ -46,14 +48,14 @@ export default function Page() {
         AS_NEEDED: 10,
     }), []);
 
-    const [formData, setFormData] = useState({
+    const formDefault = {
         name: '',
         doseage: 0,
         unit: DosageUnit.MG,
         type: MedType.PILL,
         frequency: Frequency.ONCE_DAILY,
         time: dayjs()
-    });
+    };
 
     const errorDefault = {
         name: false,
@@ -64,8 +66,15 @@ export default function Page() {
         time: false
     };
 
+    const [formData, setFormData] = useState(formDefault);
     const [errorData, setErrorData] = useState(errorDefault);
     const [mysession, setMySession] = useState();
+    const [snackbarSev, setSnackbarSev] = useState({
+        message: "Successfully submitted medication info!",
+        severity: "success"
+    });
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (field) => (event) => {
         const value = event.target ? event.target.value : event;
@@ -96,6 +105,7 @@ export default function Page() {
 
         formData.time = formData.time.set('seconds', 0).set('milliseconds', 0);
     
+        setLoading(true);
         const { error } = await supabase.from("medications").insert({
             uuid: mysession.data.user.id,
             name: formData.name,
@@ -105,7 +115,22 @@ export default function Page() {
             frequency: formData.frequency,
             medication_time: formData.time.toISOString(),
         });
-        console.log(error);
+        setLoading(false);
+        
+        if(error) {
+            setSnackbarSev({
+                message: "An error occurred",
+                severity: "error",
+            });
+        }
+        else {
+            setSnackbarSev({
+                message: "Successfully submitted medication info!",
+                severity: "success"
+            });
+        }
+        setSnackbarOpen(true);
+        setFormData(formDefault);
     };
 
     const renderSelectField = (label, value, onChange, items) => (
@@ -120,6 +145,10 @@ export default function Page() {
             </Select>
         </FormControl>
     );
+
+    const handleClose = () => {
+        setSnackbarOpen(false);
+    }
 
     return (
         <Stack spacing={2}>
@@ -192,9 +221,23 @@ export default function Page() {
                     </Grid> 
                 : null}
             </Grid>
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                 Submit
             </Button>
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                message="Note archived"
+                onClose={handleClose}
+            >
+                <Alert
+                    severity={snackbarSev.severity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbarSev.message}
+                </Alert>
+            </Snackbar>
         </Stack>
     );
 }
