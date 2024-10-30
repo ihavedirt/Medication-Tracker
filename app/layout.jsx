@@ -6,6 +6,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import Image from 'next/image';
 import * as React from "react";
 import {Dashboard} from "@mui/icons-material";
+import {LocalizationProvider} from "@mui/x-date-pickers";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
 export const NAVIGATION = [
     {
@@ -34,7 +36,9 @@ export default function RootLayout({ children }) {
                     logo: <Image src="/neohand.png" alt="Pocket Pills Logo" width={72} height={144} />,
                     title: 'Pocket Pills',
                 }} navigation={NAVIGATION}>
-                    {children}
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        {children}
+                    </LocalizationProvider>
                 </AppProvider>
               </AppRouterCacheProvider>
           </body>
