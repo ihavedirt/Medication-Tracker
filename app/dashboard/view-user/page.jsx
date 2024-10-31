@@ -149,12 +149,14 @@ export default function Page() {
     return (
         <div>{loading ? (
             <Stack spacing={2}>
+                <Typography variant="h4">Sub-Profiles</Typography>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
             </Stack>
         ) :(
         <Stack spacing={2}>
+            <Typography variant="h4">Sub-Profiles</Typography>
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
