@@ -111,32 +111,36 @@ export default function Page() {
         const tables = [];
 
         userData.forEach((user) =>  {
-            const userUUID = user.uuid;
-            const userSubProfileID = user.id;
-
-            medicineData.forEach((medicineEntry) => {
-                if (medicineEntry.uuid === userUUID && medicineEntry.subprofile_id === userSubProfileID) {
-                    tables.push(
-                        <TableContainer component={Paper} key={medicineEntry.subprofile_id}>
-                            <Typography variant="h6">Poop: {medicineEntry.subprofile_id}</Typography>
-                            <Table>
+            if (mysession.data.user.id === user.uuid) {
+                tables.push(
+                    <TableContainer component={Paper}>
+                        <Typography variant="h6" paddingLeft={3} paddingTop={1}>{user.first_name} {user.last_name}</Typography>
+                        <Table>
                             <TableHead>
                                 <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Dose</TableCell>
+                                    <TableCell>Name</TableCell>
+                                    <TableCell>Dose</TableCell>
+                                    <TableCell>Unit</TableCell>
+                                    <TableCell>Frequency</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                <TableCell>{medicineEntry.name}</TableCell>
-                                <TableCell>{medicineEntry.dose || 'N/A'}</TableCell>
-                                </TableRow>
+                            {medicineData
+                                .filter(medicineEntry => medicineEntry.subprofile_id === user.id)
+                                .map(medicineEntry => (
+                                    <TableRow>
+                                        <TableCell>{medicineEntry.name}</TableCell>
+                                        <TableCell>{medicineEntry.dose}</TableCell>
+                                        <TableCell>{medicineEntry.unit}</TableCell>
+                                        <TableCell>{medicineEntry.frequency}</TableCell>
+                                    </TableRow>
+                                ))
+                            }
                             </TableBody>
-                            </Table>
-                        </TableContainer>
-                    )
-                }
-            })
+                        </Table>
+                    </TableContainer>
+                )
+            }
         })
         return tables;
     }
@@ -147,14 +151,15 @@ export default function Page() {
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
-                if (tables.length > 0 ) {
+                if (tables.length > 0) {
                     return tables;
                 }
                 else {
-                    return <Typography>Could not find user </Typography>
+                    return <Typography>Could not find Profiles</Typography>
                 }
             })()}
             <Divider />
+
             <Button variant="contained" onClick={handleSubmit} disabled={loading}>
                 Submit
             </Button>
