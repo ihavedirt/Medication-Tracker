@@ -27,33 +27,34 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 
+
 export default function Page() {
     const supabase = createClient();
     const DosageUnit = useMemo(() => ({
-        ML: 0,
+        mL: 0,
         L: 1,
-        MG: 2,
-        G: 3,
-        KG: 4,
+        mg: 2,
+        g: 3,
+        kg: 4,
     }), []);
     
     const MedType = useMemo(() => ({
-        PILL: 0,
-        SYRUP: 1,
-        INJECTION: 2,
+        Pill: 0,
+        Syrup: 1,
+        Injection: 2,
     }), []);
     
     const Frequency = useMemo(() => ({
-        ONCE_DAILY: 0,
-        TWICE_DAILY: 1,
-        THREE_DAILY: 2,
-        FOUR_DAILY: 3,
-        EVERY_6: 4,
-        EVERY_8: 5,
-        EVERY_12: 7,
-        WEEKLY: 8,
-        MONTHLY: 9,
-        AS_NEEDED: 10,
+        "Once Daily": 0,
+        "Twice Daily": 1,
+        "Three Daily": 2,
+        "Four Daily": 3,
+        "Every 6 Hours": 4,
+        "Every 8 Hours": 5,
+        "Every 12 Hours": 7,
+        "Weekly": 8,
+        "Monthly": 9,
+        "As Needed": 10,
     }), []);
 
     const formDefault = {
@@ -83,29 +84,27 @@ export default function Page() {
         supabase.auth.getUser().then((session) => {
           setMySession(session);
         });
-      }, [])
+    }, [])
 
     const handleSubmit = async() => {
+        setLoading(true);
+        const { data: userData, error: userError} = await supabase
+            .from('subprofiles')
+            .select()
+            .eq('uuid', mysession.data.user.id);
+        
+        setUserData(userData || []);
 
-    setLoading(true);
-    const { data: userData, error: userError} = await supabase
-        .from('subprofiles')
-        .select()
-        .eq('uuid', mysession.data.user.id);
-    
-    setUserData(userData || []);
-    console.log('User Data:', userData);
-
-    const { data: medicineData, error: medicineError} = await supabase
-        .from('medications')
-        .select()
-        .eq('uuid', mysession.data.user.id);
-    
-    setMedicineData(medicineData || []);
-    console.log('Medicine Data:', medicineData);
-    setLoading(false);
-
+        const { data: medicineData, error: medicineError} = await supabase
+            .from('medications')
+            .select()
+            .eq('uuid', mysession.data.user.id);
+        
+        setMedicineData(medicineData || []);
+        setLoading(false);
     }
+
+    
 
     const renderMedicineTables = () => {
         const tables = [];
@@ -121,7 +120,9 @@ export default function Page() {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Dose</TableCell>
                                     <TableCell>Unit</TableCell>
+                                    <TableCell>Type</TableCell>
                                     <TableCell>Frequency</TableCell>
+                                    <TableCell>Time</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -131,8 +132,10 @@ export default function Page() {
                                     <TableRow>
                                         <TableCell>{medicineEntry.name}</TableCell>
                                         <TableCell>{medicineEntry.dose}</TableCell>
-                                        <TableCell>{medicineEntry.unit}</TableCell>
-                                        <TableCell>{medicineEntry.frequency}</TableCell>
+                                        <TableCell>{Object.keys(DosageUnit).find((key) => DosageUnit[key] === medicineEntry.unit)}</TableCell>
+                                        <TableCell>{Object.keys(MedType).find((key) => MedType[key] === medicineEntry.type)}</TableCell>
+                                        <TableCell>{Object.keys(Frequency).find((key) => Frequency[key] === medicineEntry.frequency)}</TableCell>
+                                        <TableCell>{medicineEntry.medication_time}</TableCell>
                                     </TableRow>
                                 ))
                             }
