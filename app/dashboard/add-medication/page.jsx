@@ -17,6 +17,8 @@ import { useState, useMemo, useEffect } from "react";
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 
 export default function Page() {
@@ -83,6 +85,7 @@ export default function Page() {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [subprofiles, setSubprofiles] = useState([]); // for subprofiles
+    const [enterSubprofile, setEnteringSubprofile] = useState(false);
 
     const handleChange = (field) => (event) => {
         const value = event.target ? event.target.value : event;
@@ -135,7 +138,7 @@ export default function Page() {
 
         const { error } = await supabase.from("medications").insert({
             uuid: mysession.user.id,
-            subprofile_id: formData.subprofileId,
+            subprofile_id: enterSubprofile ? formData.subprofileId : 0,
             name: formData.name,
             dose: formData.doseage,
             unit: formData.unit,
@@ -182,14 +185,22 @@ export default function Page() {
         <Stack spacing={2}>
             <Typography variant="h4">Medication Entry</Typography>
             <Divider />
-            <Grid container spacing = {1}>
-                {renderSelectField('Subprofiles', formData.subprofileId, handleChange('subprofileId'), 
-                    subprofiles.map((subprofiles) => ({
-                        label: `Subprofile: ${subprofiles.first_name|| ''} ${subprofiles.last_name || ''}`, 
-                        value: subprofiles.id
-                    })) 
-                )}
-            </Grid>
+            <FormControlLabel 
+                required control={
+                    <Switch 
+                        checked={enterSubprofile}
+                        onChange={(event) => setEnteringSubprofile(event.target.checked)}
+                    />
+                } label="Are you Entering a subprofiles medication?" 
+            />    
+                <Grid container spacing = {1}>
+                    {enterSubprofile && renderSelectField('Subprofiles', formData.subprofileId, handleChange('subprofileId'), 
+                        subprofiles.map((subprofiles) => ({
+                            label: `Subprofile: ${subprofiles.first_name|| ''} ${subprofiles.last_name || ''}`, 
+                            value: subprofiles.id
+                        })) 
+                    )}
+                </Grid>
             <Grid container spacing={1}>
                 <Grid xs={12}>
                     <TextField
