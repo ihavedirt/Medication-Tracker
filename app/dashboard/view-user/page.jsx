@@ -1,20 +1,11 @@
 'use client';
 import {
-    Alert,
     Divider,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Snackbar,
     Stack,
-    TextField,
     Typography,
-    Button
+    Skeleton
 } from "@mui/material";
-import Grid from '@mui/material/Grid2';
 import { useState, useMemo, useEffect } from "react";
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
 import * as React from 'react';
@@ -77,79 +68,92 @@ export default function Page() {
 
     const [mysession, setMySession] = useState();
     const [medicineData, setMedicineData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState([]);
 
-    useEffect (() => {
-        supabase.auth.getUser().then((session) => {
-          setMySession(session);
-        });
-    }, [])
+    useEffect(() => {
+        const fetchSessionAndSubprofiles = async () => {
+            const { data: session } = await supabase.auth.getUser();
+            setMySession(session);
 
-    const handleSubmit = async() => {
-        setLoading(true);
-        const { data: userData, error: userError} = await supabase
-            .from('subprofiles')
-            .select()
-            .eq('uuid', mysession.data.user.id);
-        
-        setUserData(userData || []);
+            if (session) {
+                const { data: userData, error: userError} = await supabase
+                    .from('subprofiles') 
+                    .select()
+                    .eq('uuid', session.user.id);
 
-        const { data: medicineData, error: medicineError} = await supabase
-            .from('medications')
-            .select()
-            .eq('uuid', mysession.data.user.id);
-        
-        setMedicineData(medicineData || []);
-        setLoading(false);
-    }
+                if (userError) {
+                    console.error("Error fetching subprofiles:", userError);
+                } else {
+                    setUserData(userData);
+                }
 
-    
+                const { data: medicineData, error: medicineError} = await supabase
+                    .from('medications') 
+                    .select()
+                    .eq('uuid', session.user.id);
+
+                if (medicineError) {
+                    console.error("Error fetching medications:", medicineError);
+                } else {
+                    setMedicineData(medicineData);
+                }
+                setLoading(false);
+            }
+        };
+
+        fetchSessionAndSubprofiles();
+    }, []);
 
     const renderMedicineTables = () => {
         const tables = [];
 
         userData.forEach((user) =>  {
-            if (mysession.data.user.id === user.uuid) {
-                tables.push(
-                    <TableContainer component={Paper}>
-                        <Typography variant="h6" paddingLeft={3} paddingTop={1}>{user.first_name} {user.last_name}</Typography>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Dose</TableCell>
-                                    <TableCell>Unit</TableCell>
-                                    <TableCell>Type</TableCell>
-                                    <TableCell>Frequency</TableCell>
-                                    <TableCell>Time</TableCell>
+            tables.push(
+                <TableContainer component={Paper}>
+                    <Typography variant="h6" paddingLeft={3} paddingTop={1}>{user.first_name} {user.last_name}</Typography>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Dose</TableCell>
+                                <TableCell>Unit</TableCell>
+                                <TableCell>Type</TableCell>
+                                <TableCell>Frequency</TableCell>
+                                <TableCell>Time</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {medicineData
+                            .filter(medicineEntry => medicineEntry.subprofile_id === user.id)
+                            .map(medicineEntry => (
+                                <TableRow key={medicineEntry.id}>
+                                    <TableCell>{medicineEntry.name}</TableCell>
+                                    <TableCell>{medicineEntry.dose}</TableCell>
+                                    <TableCell>{Object.keys(DosageUnit).find((key) => DosageUnit[key] === medicineEntry.unit)}</TableCell>
+                                    <TableCell>{Object.keys(MedType).find((key) => MedType[key] === medicineEntry.type)}</TableCell>
+                                    <TableCell>{Object.keys(Frequency).find((key) => Frequency[key] === medicineEntry.frequency)}</TableCell>
+                                    <TableCell>{medicineEntry.medication_time}</TableCell>
                                 </TableRow>
-                            </TableHead>
-                            <TableBody>
-                            {medicineData
-                                .filter(medicineEntry => medicineEntry.subprofile_id === user.id)
-                                .map(medicineEntry => (
-                                    <TableRow>
-                                        <TableCell>{medicineEntry.name}</TableCell>
-                                        <TableCell>{medicineEntry.dose}</TableCell>
-                                        <TableCell>{Object.keys(DosageUnit).find((key) => DosageUnit[key] === medicineEntry.unit)}</TableCell>
-                                        <TableCell>{Object.keys(MedType).find((key) => MedType[key] === medicineEntry.type)}</TableCell>
-                                        <TableCell>{Object.keys(Frequency).find((key) => Frequency[key] === medicineEntry.frequency)}</TableCell>
-                                        <TableCell>{medicineEntry.medication_time}</TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )
-            }
+                            ))
+                        }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )
         })
         return tables;
     }
     
 
     return (
+        <div>{loading ? (
+            <Stack spacing={2}>
+                <Skeleton animation="wave" variant="rounded" height={120}/>
+                <Skeleton animation="wave" variant="rounded" height={120}/>
+                <Skeleton animation="wave" variant="rounded" height={120}/>
+            </Stack>
+        ) :(
         <Stack spacing={2}>
             <Divider />
             {(() => {
@@ -158,14 +162,11 @@ export default function Page() {
                     return tables;
                 }
                 else {
-                    return <Typography>Could not find Profiles</Typography>
+                    return <Typography>Could not find sub profiles</Typography>
                 }
             })()}
             <Divider />
-
-            <Button variant="contained" onClick={handleSubmit} disabled={loading}>
-                Submit
-            </Button>
         </Stack>
+        )}</div>
     )
 }
