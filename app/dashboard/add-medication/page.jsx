@@ -21,6 +21,7 @@ import { createClient } from '../../../utils/supabase/client';
 
 export default function Page() {
     const supabase = createClient();
+
     const DosageUnit = useMemo(() => ({
         ML: 0,
         L: 1,
@@ -54,7 +55,10 @@ export default function Page() {
         unit: DosageUnit.MG,
         type: MedType.PILL,
         frequency: Frequency.ONCE_DAILY,
-        time: dayjs()
+        time: dayjs(),
+        subprofileId: '',
+        subprofileFirstName: '',
+        subprofileLastName: ''
     };
 
     const errorDefault = {
@@ -63,7 +67,10 @@ export default function Page() {
         unit: false,
         type: false,
         frequency: false,
-        time: false
+        time: false,
+        subprofileId: false,
+        subprofileFirstName: false,
+        subprofileLastName: false
     };
 
     const [formData, setFormData] = useState(formDefault);
@@ -75,17 +82,36 @@ export default function Page() {
     });
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [subprofiles, setSubprofiles] = useState([]); // for subprofiles
 
     const handleChange = (field) => (event) => {
         const value = event.target ? event.target.value : event;
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    useEffect (() => {
-        supabase.auth.getUser().then((session) => {
-          setMySession(session);
-        });
-      }, [])
+    
+    // Fetching primary and sub user profile data
+    useEffect(() => {
+        const fetchSessionAndSubprofiles = async () => {
+            const { data: session } = await supabase.auth.getUser();
+            setMySession(session);
+            
+            if (session) {
+                const { data: subprofileData, error } = await supabase
+                    .from('subprofiles') 
+                    .select('id, first_name, last_name')
+                    .eq('uuid', session.user.id);
+
+                if (error) {
+                    console.error("Error fetching subprofiles:", error);
+                } else {
+                    setSubprofiles(subprofileData);
+                }
+            }
+        };
+
+        fetchSessionAndSubprofiles();
+    }, []);
 
     const handleSubmit = async () => {
         const newErrorData = {
@@ -106,8 +132,10 @@ export default function Page() {
         formData.time = formData.time.set('seconds', 0).set('milliseconds', 0);
     
         setLoading(true);
+
         const { error } = await supabase.from("medications").insert({
-            uuid: mysession.data.user.id,
+            uuid: mysession.user.id,
+            subprofile_id: formData.subprofileId,
             name: formData.name,
             dose: formData.doseage,
             unit: formData.unit,
@@ -116,7 +144,7 @@ export default function Page() {
             medication_time: formData.time.toISOString(),
         });
         setLoading(false);
-        
+
         if(error) {
             setSnackbarSev({
                 message: "An error occurred",
@@ -154,6 +182,14 @@ export default function Page() {
         <Stack spacing={2}>
             <Typography variant="h4">Medication Entry</Typography>
             <Divider />
+            <Grid container spacing = {1}>
+                {renderSelectField('Subprofiles', formData.subprofileId, handleChange('subprofileId'), 
+                    subprofiles.map((subprofiles) => ({
+                        label: `Subprofile: ${subprofiles.first_name|| ''} ${subprofiles.last_name || ''}`, 
+                        value: subprofiles.id
+                    })) 
+                )}
+            </Grid>
             <Grid container spacing={1}>
                 <Grid xs={12}>
                     <TextField
