@@ -60,7 +60,8 @@ export default function Page() {
         time: dayjs(),
         subprofileId: '',
         subprofileFirstName: '',
-        subprofileLastName: ''
+        subprofileLastName: '',
+        quantity: null
     };
 
     const errorDefault = {
@@ -72,7 +73,8 @@ export default function Page() {
         time: false,
         subprofileId: false,
         subprofileFirstName: false,
-        subprofileLastName: false
+        subprofileLastName: false,
+        quantity: false
     };
 
     const [formData, setFormData] = useState(formDefault);
@@ -145,6 +147,7 @@ export default function Page() {
             type: formData.type,
             frequency: formData.frequency,
             medication_time: formData.time.toISOString(),
+            quantity: formData.quantity
         });
         setLoading(false);
 
@@ -222,6 +225,19 @@ export default function Page() {
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
+                <Grid xs={6}>
+                    <TextField
+                            error={errorData.quantity}
+                            label="Quantity"
+                            variant="filled"
+                            value={formData.quantity}
+                            onChange={handleChange('quantity')}
+                            fullWidth
+                            helperText="A quantity is required"
+                    />
+                </Grid>
+            </Grid>
+            <Grid container spacing={1}>
                 <Grid xs={12}>
                     <TextField
                             error={errorData.doseage}
@@ -242,8 +258,6 @@ export default function Page() {
                         { label: 'kg', value: DosageUnit.KG },
                     ])}
                 </Grid>
-            </Grid>
-            <Grid container spacing={1}>
                 <Grid xs={12}>
                     {renderSelectField('Frequency', formData.frequency, handleChange('frequency'), [
                         { label: 'Once Daily', value: Frequency.ONCE_DAILY },
@@ -258,7 +272,9 @@ export default function Page() {
                         { label: 'As Needed', value: Frequency.AS_NEEDED },
                     ])}
                 </Grid>
-                {formData.frequency != Frequency.AS_NEEDED ? 
+            </Grid>
+            <Grid container spacing={1}>
+            {formData.frequency != Frequency.AS_NEEDED ? 
                     <Grid xs={12}>
                         <TimePicker
                             label="Medication time"
