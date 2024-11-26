@@ -22,21 +22,19 @@ export async function login(provider, formData) {
 }
 
 export async function signup(provider, formData) {
-    const supabase = createClient()
+    const supabase = createClient();
 
     const data = {
-        email: formData.get('email'),
-        password: formData.get('password'),
+        email: formData.email,
+        password: formData.password
     }
 
     const { error } = await supabase.auth.signUp(data)
 
     if (error) {
+        console.log(error);
         redirect('/error')
     }
-
-    revalidatePath('/dashboard', 'layout')
-    redirect('/dashboard')
 }
 
 export async function signout() {
