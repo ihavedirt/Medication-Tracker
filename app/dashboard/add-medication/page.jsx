@@ -53,7 +53,7 @@ export default function Page() {
 
     const formDefault = {
         name: '',
-        doseage: 0,
+        doseage: null,
         unit: DosageUnit.MG,
         type: MedType.PILL,
         frequency: Frequency.ONCE_DAILY,
@@ -122,9 +122,10 @@ export default function Page() {
         const newErrorData = {
             name: formData.name === '',
             doseage: !Number.isFinite(Number(formData.doseage)) || formData.doseage <= 0,
+            quantity: formData.quantity  === null 
         };
     
-        if (newErrorData.name || newErrorData.doseage) {
+        if (newErrorData.name || newErrorData.doseage || newErrorData.quantity) {
             setErrorData({
                 ...errorData,
                 ...newErrorData,
@@ -230,7 +231,7 @@ export default function Page() {
                             error={errorData.quantity}
                             label="Quantity"
                             variant="filled"
-                            value={formData.quantity}
+                            value={formData.quantity || ''}
                             onChange={handleChange('quantity')}
                             fullWidth
                             helperText="A quantity is required"
