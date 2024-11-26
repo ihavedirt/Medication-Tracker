@@ -1,21 +1,27 @@
-'use client';
-
-import * as React from "react";
-import Button from '@mui/material/Button';
-
+import { jsPDF } from "jspdf";
+import Button from '@mui/material/Button'
 export default function DownloadPDFButton() {
-    const handleDownload = async () => {
-        const response = await fetch('/api/generate-pdf');
-        const blob = await response.blob();
+    const handleDownload = () => {
+        const doc = new jsPDF();
 
-        // Create a download link
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'Medication_Report.pdf';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        // Add content to the PDF
+        doc.setFontSize(18);
+        doc.text('Medication Report', 105, 20, { align: 'center' });
+
+        const medications = [
+            { id: 1, name: 'Aspirin', dosage: '100mg' },
+            { id: 2, name: 'Paracetamol', dosage: '500mg' },
+        ];
+
+        let y = 30;
+        doc.setFontSize(12);
+        medications.forEach((med) => {
+            doc.text(`ID: ${med.id} | Name: ${med.name} | Dosage: ${med.dosage}`, 10, y);
+            y += 10;
+        });
+
+        // Download the PDF
+        doc.save('Medication_Report.pdf');
     };
 
     return (
