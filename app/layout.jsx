@@ -5,7 +5,7 @@ import MedicationIcon from '@mui/icons-material/Medication';
 import PersonIcon from '@mui/icons-material/Person';
 import Image from 'next/image';
 import * as React from "react";
-import {Dashboard} from "@mui/icons-material";
+import {Article, Dashboard} from "@mui/icons-material";
 import {LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -24,6 +24,11 @@ export const NAVIGATION = [
         segment: 'dashboard/add-user',
         title: 'Add User',
         icon: <PersonIcon/>,
+    },
+    {
+        segment: 'dashboard/export-pdf',
+        title: 'Export Medication History',
+        icon: <Article/>,
     }
 ];
 
