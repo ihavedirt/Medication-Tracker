@@ -8,12 +8,13 @@ export default async function Dashboard() {
     const supabase = createClient();
     const { data: notes } = await supabase.from("notes").select();
 
-    /*const [subprofiles, setSubprofiles] = useState([]);
+    const [mysession, setMySession] = useState();
+    const [subprofiles, setSubprofiles] = useState([]);
     const [medications, setMedications] = useState([]);
 
     // Fetching primary and sub user profile data
     useEffect(() => {
-        const fetchSessionAndSubprofiles = async () => {
+        const fetchSession_Subprofiles_Medications = async () => {
             const { data: session } = await supabase.auth.getUser();
             setMySession(session);
             
@@ -31,8 +32,8 @@ export default async function Dashboard() {
             }
         };
 
-        fetchSessionAndSubprofiles();
-    }, []);*/
+        fetchSession_Subprofiles_Medications();
+    }, []);
 
 
     return <div><Weekview
