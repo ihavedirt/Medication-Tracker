@@ -11,6 +11,8 @@ export default function SignupPage() {
         password: '',
     });
 
+    const [errors, setErrors] = useState({});
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -19,10 +21,38 @@ export default function SignupPage() {
         });
     };
 
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log('Form data submitted:', formData);
+        const newErrors = {};
+
+        if (!formData.firstName) {
+            newErrors.firstName = 'First name is required';
+        }
+        if (!formData.lastName) {
+            newErrors.lastName = 'Last name is required';
+        }
+        if (!formData.email) {
+            newErrors.email = 'Email is required';
+        } else if (!validateEmail(formData.email)) {
+            newErrors.email = 'Invalid email address';
+        }
+        if (!formData.password) {
+            newErrors.password = 'Password is required';
+        } else if (formData.password.length <= 6) {
+            newErrors.password = 'Password must be more than 6 characters';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
         signup([{ id: 'credentials', name: 'Email and Password' }], {
             displayname: formData.firstName + ' ' + formData.lastName,
             email: formData.email,
@@ -46,6 +76,8 @@ export default function SignupPage() {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleChange}
+                        error={!!errors.firstName}
+                        helperText={errors.firstName}
                     />
                     <TextField
                         fullWidth
@@ -56,6 +88,8 @@ export default function SignupPage() {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleChange}
+                        error={!!errors.lastName}
+                        helperText={errors.lastName}
                     />
                     <TextField
                         fullWidth
@@ -66,6 +100,8 @@ export default function SignupPage() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
                     />
                     <TextField
                         fullWidth
@@ -77,6 +113,8 @@ export default function SignupPage() {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
+                        error={!!errors.password}
+                        helperText={errors.password}
                     />
                     <Button
                         fullWidth

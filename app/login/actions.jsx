@@ -35,6 +35,9 @@ export async function signup(provider, formData) {
         console.log(error);
         redirect('/error')
     }
+
+    revalidatePath('/dashboard', 'layout')
+    redirect('/dashboard')
 }
 
 export async function signout() {
