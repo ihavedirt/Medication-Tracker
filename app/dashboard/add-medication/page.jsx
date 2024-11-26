@@ -43,9 +43,6 @@ export default function Page() {
         TWICE_DAILY: 1,
         THREE_DAILY: 2,
         FOUR_DAILY: 3,
-        EVERY_6: 4,
-        EVERY_8: 5,
-        EVERY_12: 7,
         WEEKLY: 8,
         MONTHLY: 9,
         AS_NEEDED: 10,
@@ -244,7 +241,7 @@ export default function Page() {
                             error={errorData.doseage}
                             label="Doseage"
                             variant="filled"
-                            value={formData.doseage}
+                            value={formData.doseage || ''}
                             onChange={handleChange('doseage')}
                             fullWidth
                             helperText="A dosage is required"
@@ -265,9 +262,6 @@ export default function Page() {
                         { label: 'Twice Daily', value: Frequency.TWICE_DAILY },
                         { label: 'Three Times Daily', value: Frequency.THREE_DAILY },
                         { label: 'Four Times Daily', value: Frequency.FOUR_DAILY },
-                        { label: 'Every 6 Hours', value: Frequency.EVERY_6 },
-                        { label: 'Every 8 Hours', value: Frequency.EVERY_8 },
-                        { label: 'Every 12 Hours', value: Frequency.EVERY_12 },
                         { label: 'Weekly', value: Frequency.WEEKLY },
                         { label: 'Monthly', value: Frequency.MONTHLY },
                         { label: 'As Needed', value: Frequency.AS_NEEDED },
