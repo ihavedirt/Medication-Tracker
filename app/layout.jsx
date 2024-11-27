@@ -3,6 +3,7 @@ import {AppProvider} from "@toolpad/core/AppProvider";
 import {AppRouterCacheProvider} from "@mui/material-nextjs/v13-appRouter";
 import MedicationIcon from '@mui/icons-material/Medication';
 import PersonIcon from '@mui/icons-material/Person';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import Image from 'next/image';
 import * as React from "react";
 import {Article, Dashboard} from "@mui/icons-material";
@@ -24,11 +25,20 @@ export const NAVIGATION = [
         segment: 'dashboard/add-user',
         title: 'Add User',
         icon: <PersonIcon/>,
+<<<<<<< HEAD
     },
     {
         segment: 'dashboard/export-pdf',
         title: 'Export Medication History',
         icon: <Article/>,
+||||||| 63181dc
+=======
+    },
+    {
+        segment: 'dashboard/view-user',
+        title: 'View Users',
+        icon: <SupervisorAccountIcon/>,
+>>>>>>> main
     }
 ];
 
