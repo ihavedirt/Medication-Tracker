@@ -2,7 +2,7 @@
 import { createClient } from '../../utils/supabase/client';
 import { useState, useEffect } from "react"
 import Weekview from '../ui/weekview';
-import { MedicalInformation } from '@mui/icons-material';
+//import { MedicalInformation } from '@mui/icons-material';
 
 
 export default async function Dashboard() {
@@ -50,8 +50,12 @@ export default async function Dashboard() {
     }, []);
 
 
-    return <div><Weekview
-    /*subusers_fname={subprofiles.first_name}
-    subusers_lname={subprofiles.last_name}*/
-    /></div>
+    return (
+        <div>
+            <Weekview
+                profileInfo={subprofiles}
+                medicationInfo={medications}
+            />
+        </div>
+    );
 }
