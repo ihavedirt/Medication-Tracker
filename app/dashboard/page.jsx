@@ -2,6 +2,7 @@
 import { createClient } from '../../utils/supabase/client';
 import { useState, useEffect } from "react"
 import Weekview from '../ui/weekview';
+import { MedicalInformation } from '@mui/icons-material';
 
 
 export default async function Dashboard() {
@@ -14,25 +15,38 @@ export default async function Dashboard() {
 
     // Fetching primary and sub user profile data
     useEffect(() => {
-        const fetchSession_Subprofiles_Medications = async () => {
+        const fetchSessionSubprofilesMedications = async () => {
             const { data: session } = await supabase.auth.getUser();
             setMySession(session);
             
             if (session) {
-                const { data: subprofileData, error } = await supabase
+                // pulling user data from 'subprofiles' table in database
+                const { data: subprofileData, errorProf } = await supabase
                     .from('subprofiles') 
                     .select('id, first_name, last_name')
                     .eq('uuid', session.user.id);
 
-                if (error) {
-                    console.error("Error fetching subprofiles:", error);
+                if (errorProf) {
+                    console.error("Error fetching subprofiles:", errorProf);
                 } else {
                     setSubprofiles(subprofileData);
+                }
+
+                // pulling medication data form 'medications' table in database
+                const { data: medicationData, errorMed } = await supabase
+                    .from('medications')
+                    .select('id, name, dose')
+                    .eq('uuid', session.user.id);
+
+                if (errorMed) {
+                    console.error("Error fetching medications:", errorMed);
+                } else {
+                    setMedications(medicationData);
                 }
             }
         };
 
-        fetchSession_Subprofiles_Medications();
+        fetchSessionSubprofilesMedications();
     }, []);
 
 
