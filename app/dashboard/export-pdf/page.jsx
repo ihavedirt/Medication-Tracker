@@ -3,12 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
 import DownloadPDFButton from "../../ui/download-pdf-button";
+import { createClient } from '../../../utils/supabase/client';
 
 export default function ExportMedicationHistory() {
     const [medications, setMedications] = useState([]);
 
     // Example data (replace this with API call to fetch user's data)
     useEffect(() => {
+        const fetchSession = async () => {
+            const { data: session } = await supabase.auth.getUser();
+            setMySession(session);
+
+            if (session) {
+                const { data: userData, error: userError} = await supabase
+                    .from('subprofiles')
+                    .select()
+                    .eq('uuid', session.user.id);
+                
+                if (userError) {
+                    console.error("Error fetching subprofiles:", userError);
+                } else {
+                    setUserData(userData);
+                }
+
+                
+            }
+        }
         // Simulating fetching data from an API
         const fetchedMedications = [
             { id: 1, name: 'Aspirin', dosage: '100mg', date: '2024-11-01' },
