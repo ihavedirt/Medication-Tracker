@@ -29,6 +29,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import DownloadPDFButton from "../../ui/download-pdf-button";
+import ListItemText from '@mui/material/ListItemText';
+import Checkbox from '@mui/material/Checkbox';
 
 export default function ExportMedicationHistory() {
     const supabase = createClient();
@@ -37,6 +39,8 @@ export default function ExportMedicationHistory() {
 
     const handleChange = (event) => {
         setAge(Number(event.target.value) || '');
+        const { value } = event.target;
+        setSelectedSubprofiles(typeof value === 'string' ? value.split(',') : value);
     };
 
     const handleClickOpen = () => {
@@ -98,6 +102,7 @@ export default function ExportMedicationHistory() {
     const [medicineData, setMedicineData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState([]);
+    const [selectedSubprofiles, setSelectedSubprofiles] = useState([]);
 
     // Example data (replace this with API call to fetch user's data)
     useEffect(() => {
@@ -137,7 +142,7 @@ export default function ExportMedicationHistory() {
     const renderMedicineTables = () => {
         const tables = [];
 
-        userData.forEach((user) =>  {
+        userData.filter((user) => selectedSubprofiles.includes(user.id)).forEach((user) =>  {
             tables.push(
                 <TableContainer component={Paper} key={user.id}>
                     <Typography variant="h6" paddingLeft={3} paddingTop={1}>{user.first_name} {user.last_name}</Typography>
@@ -178,57 +183,52 @@ export default function ExportMedicationHistory() {
         <div>
             <Button onClick={handleClickOpen}>Select Users to Export</Button>
             <Dialog disableEscapeKeyDown open={open} onClose={handleClose}>
-                <DialogTitle>Fill the form</DialogTitle>
+                <DialogTitle>Select Subprofiles to export</DialogTitle>
                 <DialogContent>
         <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
-            <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel htmlFor="demo-dialog-native">Age</InputLabel>
+            <FormControl sx={{ m: 1, minWidth: 240 }}>
+            <InputLabel htmlFor="demo-dialog-native">Subprofiles</InputLabel>
             <Select
-                native
-                value={age}
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
+                multiple
+                value = {selectedSubprofiles}
                 onChange={handleChange}
-                input={<OutlinedInput label="Age" id="demo-dialog-native" />}
-            >
-                <option aria-label="None" value="" />
-                <option value={10}>Ten</option>
-                <option value={20}>Twenty</option>
-                <option value={30}>Thirty</option>
-            </Select>
+                input={<OutlinedInput label="Subprofiles" />}
+                renderValue={(selected) => userData
+                    .filter((user) => selected.includes(user.id))
+                    .map((user) => user.first_name)
+                    .join(', ')
+                }
+          //MenuProps={MenuProps}
+        >
+          {userData.map((user) =>  (
+            <MenuItem key={user.id} value={user.id}>
+              <Checkbox checked={selectedSubprofiles.includes(user.id)} />
+              <ListItemText primary={`${user.first_name} ${user.last_name}`} />
+            </MenuItem>
+          ))}
+        </Select>
             </FormControl>
-            <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="demo-dialog-select-label">Age</InputLabel>
-            <Select
-                labelId="demo-dialog-select-label"
-                id="demo-dialog-select"
-                value={age}
-                onChange={handleChange}
-                input={<OutlinedInput label="Age" />}
-            >
-                <MenuItem value="">
-                <em>None</em>
-                </MenuItem>
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-            </FormControl>
+            
         </Box>
         </DialogContent>
         <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
         <Button onClick={handleClose}>Ok</Button>
+        
         </DialogActions>
     </Dialog>
             {loading ? (
             <Stack spacing={2}>
-                <Typography variant="h4">Sub-Profiles</Typography>
+                <Typography variant="h4">Export Medication History</Typography>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
                 <Skeleton animation="wave" variant="rounded" height={120}/>
             </Stack>
         ) :(
         <Stack spacing={2}>
-            <Typography variant="h4">Sub-Profiles</Typography>
+            <Typography variant="h4">Export Medication History</Typography>
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
@@ -241,6 +241,9 @@ export default function ExportMedicationHistory() {
             })()}
             <Divider />
         </Stack>
-        )}</div>
+        
+        )}
+        <DownloadPDFButton userData={userData.filter((user) => selectedSubprofiles.includes(user.id))} medicineData={medicineData}/>
+        </div>
     )
 }
