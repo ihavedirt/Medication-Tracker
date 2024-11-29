@@ -9,6 +9,7 @@ export default function SignupPage() {
         lastName: '',
         email: '',
         password: '',
+        phoneNumber: '',
     });
 
     const [errors, setErrors] = useState({});
@@ -24,6 +25,11 @@ export default function SignupPage() {
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(String(email).toLowerCase());
+    };
+
+    const validatePhoneNumber = (phoneNumber) => {
+        const re = /^\d{10}$/; // Simple validation for 10-digit phone numbers
+        return re.test(String(phoneNumber));
     };
 
     const handleSubmit = (e) => {
@@ -46,6 +52,11 @@ export default function SignupPage() {
         } else if (formData.password.length <= 6) {
             newErrors.password = 'Password must be more than 6 characters';
         }
+        if (!formData.phoneNumber) {
+            newErrors.phoneNumber = 'Phone number is required';
+        } else if (!validatePhoneNumber(formData.phoneNumber)) {
+            newErrors.phoneNumber = 'Invalid phone number';
+        }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -53,11 +64,7 @@ export default function SignupPage() {
         }
 
         setErrors({});
-        signup([{ id: 'credentials', name: 'Email and Password' }], {
-            displayname: formData.firstName + ' ' + formData.lastName,
-            email: formData.email,
-            password: formData.password
-        });
+        signup([{ id: 'credentials', name: 'Email and Password' }], formData);
     };
 
     return (
@@ -115,6 +122,18 @@ export default function SignupPage() {
                         onChange={handleChange}
                         error={!!errors.password}
                         helperText={errors.password}
+                    />
+                    <TextField
+                        fullWidth
+                        margin="normal"
+                        label="Phone Number"
+                        variant="outlined"
+                        required
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        error={!!errors.phoneNumber}
+                        helperText={errors.phoneNumber}
                     />
                     <Button
                         fullWidth
