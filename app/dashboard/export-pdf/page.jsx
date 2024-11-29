@@ -229,7 +229,7 @@ export default function ExportMedicationHistory() {
         ) :(
         <Stack spacing={2}>
             <Typography variant="h4">Export Medication History</Typography>
-            <Button variant="contained" color="primary" onClick={handleClickOpen}>Select Users to Export</Button>
+            <Button variant="contained" color="primary" onClick={handleClickOpen} disabled={userData.length == 0}>Select Users to Export</Button>
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
@@ -237,14 +237,15 @@ export default function ExportMedicationHistory() {
                     return tables;
                 }
                 else {
-                    return <Typography>Could not find sub profiles</Typography>
+                    return <Typography>No profiles selected</Typography>
                 }
             })()}
             <Divider />
+            <DownloadPDFButton userData={userData.filter((user) => selectedSubprofiles.includes(user.id))} medicineData={medicineData}/>
         </Stack>
         
         )}
-        <DownloadPDFButton userData={userData.filter((user) => selectedSubprofiles.includes(user.id))} medicineData={medicineData}/>
+        
         </div>
     )
 }
