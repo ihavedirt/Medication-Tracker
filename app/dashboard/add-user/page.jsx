@@ -18,7 +18,6 @@ import dayjs from "dayjs";
 import { createClient } from '../../../utils/supabase/client';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import InsertInvitationIcon from '@mui/icons-material/InsertInvitation';
-import DownloadPDFButton from "../../ui/download-pdf-button";
 
 export default function Page() {
     const supabase = createClient();
@@ -174,9 +173,6 @@ export default function Page() {
                     {snackbarSev.message}
                 </Alert>
             </Snackbar>
-            <div>
-                <DownloadPDFButton/>
-            </div>
         </Stack>
     );
 }
