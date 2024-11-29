@@ -10,8 +10,9 @@ const client = require('twilio')(accountSid, authToken);
 // keep this async if we gonna access the backend here
 export async function POST(req, res) {
     //if (req.method === 'POST') {
-        // this needs to be integrated
-        // const { number, body } = JSON.parse(req.body);
+
+    // this needs to be integrated
+    // const { number, body } = JSON.parse(req.body);
     client.messages
         .create({
         body: 'new message 2',
@@ -19,8 +20,8 @@ export async function POST(req, res) {
         to: '+13062620223'
     })
     return NextResponse.json({ status: 200 })
-/*
-        .then((message) => { // ok
+
+/*        .then((message) => { // ok
             res.status(200).json({ messageSId: message.sid });
         })
         .catch((err) => { // bad :(
