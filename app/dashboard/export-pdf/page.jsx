@@ -181,7 +181,7 @@ export default function ExportMedicationHistory() {
 
     return (
         <div>
-            <Button onClick={handleClickOpen}>Select Users to Export</Button>
+            
             <Dialog disableEscapeKeyDown open={open} onClose={handleClose}>
                 <DialogTitle>Select Subprofiles to export</DialogTitle>
                 <DialogContent>
@@ -229,6 +229,7 @@ export default function ExportMedicationHistory() {
         ) :(
         <Stack spacing={2}>
             <Typography variant="h4">Export Medication History</Typography>
+            <Button variant="contained" color="primary" onClick={handleClickOpen}>Select Users to Export</Button>
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
