@@ -73,7 +73,7 @@ export async function GET(request) {
             const shouldDeductFlag = shouldDeduct(frequency, medTime, now);
 
             if (shouldDeductFlag) {
-                const newQuantity = quantity - dose;
+                let newQuantity = quantity - dose;
                 if (newQuantity < 0) {
                     newQuantity = 0;
                 }
