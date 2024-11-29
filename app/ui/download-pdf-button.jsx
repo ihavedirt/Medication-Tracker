@@ -4,7 +4,7 @@ import Button from '@mui/material/Button'
 import { useEffect, useMemo } from "react";
 import dayjs from "dayjs";
 
-export default function DownloadPDFButton({userData, medicineData}) {
+export default function DownloadPDFButton({parentData, userData, medicineData}) {
     
     const DosageUnit = useMemo(() => ({
         mL: 0,
@@ -58,12 +58,62 @@ export default function DownloadPDFButton({userData, medicineData}) {
         /* Adjusting line color */
         doc.setDrawColor(200, 200, 200);
         doc.line(10, 18, 200, 18);
-        doc.setFont('Courier', 'bold')
+        doc.setFont('Courier', 'bold');
+        parentData.forEach((parent) => {
+            const parentMeds = medicineData.filter((medicine) => medicine.uuid == parentData[0].uuid);
+
+            if (parentMeds.length > 0) {
+                
+                doc.text(`Medication History for: ${parentData[0].first_name} ${parentData[0].last_name}`, 10, y);
+                y += 10;
+                
+                const itemDetailsRows = parentMeds.map((med) => {
+                    const formattedBirthDate = dayjs(med.medication_time).format('YYYY-MM-DD');
+                    const dosageUnit = Object.keys(DosageUnit).find((key) => DosageUnit[key] === med.unit);
+                    return [
+                        med.name.toString(),
+                        `${med.dose}${dosageUnit}`,
+                        med.quantity,
+                        formattedBirthDate.toString(),
+                    ];
+                });
         
+                doc.autoTable({
+                    head: [colHeaders],
+                    body: itemDetailsRows,
+                    startY: y,
+                    headStyles: {
+                        fillColor: headerStyles.fillColor,
+                        textColor: headerStyles.textColor,
+                        fontStyle: headerStyles.fontStyle,
+                        fontSize: 10,
+                        font: 'Courier',
+                        halign: 'left',
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' },
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 'auto' },
+                        3: { cellWidth: 'auto' },
+                    },
+                    alternateRowStyles: { fillColor: [255, 255, 255] },
+                    bodyStyles: {
+                        fontSize: 10,
+                        font: 'Courier',
+                        cellPadding: { top: 1, right: 5, bottom: 1, left: 2 },
+                        textColor: [0, 0, 0],
+                        rowPageBreak: 'avoid',
+                    },
+                    margin: { top: 10, left: 10, right: 10 },
+                });
+        
+                y = doc.lastAutoTable.finalY + 10;
+
+            }
+        });
         /* Loop through each user, filter their medication, display in table */
         userData.forEach((user) => {
             const userMeds = medicineData.filter((medicine) => medicine.subprofile_id == user.id);
-        
             if (userMeds.length > 0) {
                 doc.text(`Medication History for: ${user.first_name} ${user.last_name}`, 10, y);
                 y += 10;
@@ -129,7 +179,7 @@ export default function DownloadPDFButton({userData, medicineData}) {
     }
 
     return (
-        <Button variant="contained" color="primary" onClick={handleDownload} disabled={userData.length == 0}>
+        <Button variant="contained" color="primary" onClick={handleDownload} disabled={userData?.length == 0 && parentData?.length == 0}>
             Export Medication History
         </Button>
     );
