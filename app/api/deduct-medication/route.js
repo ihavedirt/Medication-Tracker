@@ -1,6 +1,10 @@
 import { createClient } from '../../../utils/supabase/client';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+//import twilio from 'twilio';
 
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 const supabase = createClient();
 
 // Helper function to determine if medication should be deducted
@@ -16,6 +20,8 @@ const shouldDeduct = (frequency, medTime, now) => {
             return diffInHours >= 8;
         case 3: // Four Times Daily
             return diffInHours >= 6;
+        case 4:
+            return diffInHours >= (1/12);
         case 8:
             return diffInHours >= 168;
         case 9:
@@ -42,6 +48,9 @@ const updateMedicationTime = (frequency, medTime) => {
         case 3: // Four Times Daily
             newMedTime.setHours(newMedTime.getHours() + 6); // Add 6 hours
             break;
+        case 4:
+            newMedTime.setHours(newMedTime.getHours() + (1/12));
+            break;
         case 8:
             newMedTime.setHours(newMedTime.getHours() + 168); // Add 168 hours
             break;
@@ -55,17 +64,37 @@ const updateMedicationTime = (frequency, medTime) => {
     return newMedTime;
 }
 
-export async function GET(request) {
+export async function POST(req, res) {
     try {
         const now = new Date();
         const medicationsProcessed = [];
 
+        const { data: user, error: userError } = await supabase.auth.getUser();
+
+        // if (!user) {
+        //     return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
+        // }
+        const userUUID = user.id;
+        const getUserId = () => {
+            const user = supabase.auth.getUser(); // Get the currently authenticated user
+            if (user) {
+              console.log('User ID (UUID):', user.id); // This is the UUID
+              return user.id;
+            } else {
+              console.log('No user is logged in');
+              return null;
+            }
+          };
+          
+        getUserId();
         // Fetch medications from the database
-        const { data: medications, error } = await supabase.from('medications').select('*');
+        const { data: medications, error } = await supabase.from('medications').select('*') ;
         if (error) throw error;
 
+        const filteredMedications = medications.filter(med => 'uuid' === medications.uuid);
+
         // Process each medication for possible quantity deduction
-        const updates = medications.map(async (med) => {
+        const updates = filteredMedications.map(async (med) => {
             const { frequency, medication_time, quantity, id, dose } = med;
             const medTime = new Date(medication_time);
 
@@ -81,28 +110,46 @@ export async function GET(request) {
                 const newMedTime = updateMedicationTime(frequency, medTime);
                 const updateResponse = await supabase
                         .from('medications')
-                        .update({ quantity: newQuantity, medication_time: newMedTime.toISOString() })
-                        .eq('id', id);
-                if (newQuantity > 0) {
+                        .update({ quantity: newQuantity, medication_time: newMedTime.toISOString()})
+                        .eq('uuid', userUUID);
+                  if (newQuantity === null) {
+                        medicationsProcessed.push({
+                            id,
+                            name: med.name,
+                            dose,
+                            frequency,
+                            newQuantity,
+                           medicationTime: medTime.toISOString(),
+                           status: 'Skipped due to null quantity',
+                       });
+                   }
+                else if (newQuantity > 5) {
                     medicationsProcessed.push({
                         id,
                         name: med.name,
                         dose,
                         frequency,
-                        quantity,
+                        newQuantity,
                         medicationTime: newMedTime.toISOString(),
                         status: 'Updated successfully',
                     });
-                } else {
+                } else if (newQuantity <= 5) {
                     medicationsProcessed.push({
                         id,
                         name: med.name,
                         dose,
                         frequency,
-                        quantity,
+                        newQuantity,
                         medicationTime: medTime.toISOString(),
-                        status: 'Quantity depleted',
+                        status: 'Quantity low',
                     });
+
+                    client.messages
+                        .create({
+                        body: `Hey sussybaka, only ${newQuantity} pills of ${med.name} left. Keep your health on track by restocking soon!`,
+                        from: '+17753209715',
+                        to: '+13067159671'
+                    })
                     //ADD DAVIDS CODE
                 }
             } else {
@@ -124,8 +171,8 @@ export async function GET(request) {
         // Return structured response with the processed medication details
         return NextResponse.json({
             message: 'Medication quantities updated successfully!',
-            medicationsProcessed,
-        });
+            medicationsProcessed, }, { status: 200}
+        );
     } catch (err) {
         console.error('Error updating medications:', err);
         return NextResponse.json({
