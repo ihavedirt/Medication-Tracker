@@ -1,4 +1,4 @@
-import { createClient } from '../../../utils/supabase/client';
+import { createClient } from '../../../utils/supabase/server';
 import { NextResponse } from 'next/server';
 //import twilio from 'twilio';
 
@@ -69,25 +69,27 @@ export async function POST(req, res) {
         const now = new Date();
         const medicationsProcessed = [];
 
-        const { data: user, error: userError } = await supabase.auth.getUser();
+        // const { data: user, error: userError } = await supabase.auth.getUser();
 
         // if (!user) {
         //     return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
         // }
-        const userUUID = user.id;
-        const getUserId = () => {
-            const user = supabase.auth.getUser(); // Get the currently authenticated user
-            if (user) {
-              console.log('User ID (UUID):', user.id); // This is the UUID
-              return user.id;
-            } else {
-              console.log('No user is logged in');
-              return null;
-            }
-          };
+        // const userUUID = user.id;
+        // const getUserId = () => {
+        //     const user = supabase.auth.getUser(); // Get the currently authenticated user
+        //     if (user) {
+        //       console.log('User ID (UUID):', user.id); // This is the UUID
+        //       return user.id;
+        //     } else {
+        //       console.log('No user is logged in');
+        //       return null;
+        //     }
+        //   };
           
-        getUserId();
+        // getUserId();
         // Fetch medications from the database
+
+
         const { data: medications, error } = await supabase.from('medications').select('*') ;
         if (error) throw error;
 
