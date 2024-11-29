@@ -40,7 +40,8 @@ export default function ExportMedicationHistory() {
     const handleChange = (event) => {
         setAge(Number(event.target.value) || '');
         const { value } = event.target;
-        setSelectedSubprofiles(typeof value === 'string' ? value.split(',') : value);
+        const updatedSubprofiles = typeof value === 'string' ? value.split(',') : value;
+        setSelectedSubprofiles(updatedSubprofiles);
     };
 
     const handleClickOpen = () => {
@@ -102,6 +103,7 @@ export default function ExportMedicationHistory() {
     const [medicineData, setMedicineData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState([]);
+    const [parentData, setParentData] = useState([]);
     const [selectedSubprofiles, setSelectedSubprofiles] = useState([]);
 
     // Example data (replace this with API call to fetch user's data)
@@ -132,6 +134,18 @@ export default function ExportMedicationHistory() {
                 } else {
                     setMedicineData(medicineData);
                 }
+
+                const { data: parentData, error: parentError} = await supabase
+                    .from('user_data')
+                    .select()
+                    .eq('uuid', session.user.id);
+
+                if (parentError) {
+                    console.error("Error fetching parent data:", parentError);
+                } else {
+                    setParentData(parentData);
+                }
+
                 setLoading(false);
             }
         };
@@ -141,7 +155,41 @@ export default function ExportMedicationHistory() {
 
     const renderMedicineTables = () => {
         const tables = [];
-
+        if(parentData.length > 0) {
+            const parent = parentData[0];
+            tables.push(
+                <TableContainer component={Paper} key={parent.uuid}>
+                    <Typography variant="h6" paddingLeft={3} paddingTop={1}>{parent.first_name} {parent.last_name}</Typography>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Dose</TableCell>
+                                <TableCell>Unit</TableCell>
+                                <TableCell>Type</TableCell>
+                                <TableCell>Frequency</TableCell>
+                                <TableCell>Time</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {medicineData
+                            .filter(medicineEntry => medicineEntry.subprofile_id == 0)
+                            .map(medicineEntry => (
+                                <TableRow key={medicineEntry.id}>
+                                    <TableCell>{medicineEntry.name}</TableCell>
+                                    <TableCell>{medicineEntry.dose}</TableCell>
+                                    <TableCell>{Object.keys(DosageUnit).find((key) => DosageUnit[key] === medicineEntry.unit)}</TableCell>
+                                    <TableCell>{Object.keys(MedType).find((key) => MedType[key] === medicineEntry.type)}</TableCell>
+                                    <TableCell>{Object.keys(Frequency).find((key) => Frequency[key] === medicineEntry.frequency)}</TableCell>
+                                    <TableCell>{medicineEntry.medication_time}</TableCell>
+                                </TableRow>
+                            ))
+                        }
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            )
+        };
         userData.filter((user) => selectedSubprofiles.includes(user.id)).forEach((user) =>  {
             tables.push(
                 <TableContainer component={Paper} key={user.id}>
@@ -183,41 +231,46 @@ export default function ExportMedicationHistory() {
         <div>
             
             <Dialog disableEscapeKeyDown open={open} onClose={handleClose}>
-                <DialogTitle>Select Subprofiles to export</DialogTitle>
+                <DialogTitle>Select Profiles to Export</DialogTitle>
                 <DialogContent>
-        <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
-            <FormControl sx={{ m: 1, minWidth: 240 }}>
-            <InputLabel htmlFor="demo-dialog-native">Subprofiles</InputLabel>
-            <Select
-                labelId="demo-multiple-checkbox-label"
-                id="demo-multiple-checkbox"
-                multiple
-                value = {selectedSubprofiles}
-                onChange={handleChange}
-                input={<OutlinedInput label="Subprofiles" />}
-                renderValue={(selected) => userData
-                    .filter((user) => selected.includes(user.id))
-                    .map((user) => user.first_name)
-                    .join(', ')
-                }
-          //MenuProps={MenuProps}
-        >
-          {userData.map((user) =>  (
-            <MenuItem key={user.id} value={user.id}>
-              <Checkbox checked={selectedSubprofiles.includes(user.id)} />
-              <ListItemText primary={`${user.first_name} ${user.last_name}`} />
-            </MenuItem>
-          ))}
-        </Select>
-            </FormControl>
+                <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <FormControl sx={{ m: 1, minWidth: 240 }}>
+                    <InputLabel htmlFor="demo-dialog-native">Profiles</InputLabel>
+                    <Select
+                        labelId="demo-multiple-checkbox-label"
+                        id="demo-multiple-checkbox"
+                        multiple
+                        value = {selectedSubprofiles}
+                        onChange={handleChange}
+                        input={<OutlinedInput label="Profiles" />}
+                        renderValue={(selected) => [...parentData, ...userData]
+                            .filter((user) => selected.includes(user.id))
+                            .map((user) => user.first_name)
+                            .join(', ')
+                        }
+                    >
+                    {parentData.map((parent) => (
+                        <MenuItem key={parent.id} value={parent.id}>
+                        <Checkbox checked={selectedSubprofiles.includes(parent.id)} />
+                        <ListItemText primary={`${parent.first_name} ${parent.last_name} (Parent)`} />
+                        </MenuItem>
+                    ))}
+                    {userData.map((user) =>  (
+                        <MenuItem key={user.id} value={user.id}>
+                        <Checkbox checked={selectedSubprofiles.includes(user.id)} />
+                        <ListItemText primary={`${user.first_name} ${user.last_name}`} />
+                        </MenuItem>
+                    ))}
+                    </Select>
+                    </FormControl>
             
-        </Box>
-        </DialogContent>
-        <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleClose}>Ok</Button>
-        
-        </DialogActions>
+                </Box>
+                </DialogContent>
+                <DialogActions>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button onClick={handleClose}>Ok</Button>
+                
+                </DialogActions>
     </Dialog>
             {loading ? (
             <Stack spacing={2}>
@@ -229,7 +282,7 @@ export default function ExportMedicationHistory() {
         ) :(
         <Stack spacing={2}>
             <Typography variant="h4">Export Medication History</Typography>
-            <Button variant="contained" color="primary" onClick={handleClickOpen} disabled={userData.length == 0}>Select Users to Export</Button>
+            <Button variant="contained" color="primary" onClick={handleClickOpen} disabled={parentData.length == 0 && userData.length == 0}>Select Users to Export</Button>
             <Divider />
             {(() => {
                 const tables = renderMedicineTables();
@@ -241,7 +294,7 @@ export default function ExportMedicationHistory() {
                 }
             })()}
             <Divider />
-            <DownloadPDFButton userData={userData.filter((user) => selectedSubprofiles.includes(user.id))} medicineData={medicineData}/>
+            <DownloadPDFButton parentData={parentData} userData={userData.filter((user) => selectedSubprofiles.includes(user.id))} medicineData={medicineData}/>
         </Stack>
         
         )}
