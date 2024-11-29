@@ -1,5 +1,6 @@
 // tailwind.config.js
 const {nextui} = require("@nextui-org/theme");
+const { config } = require("./middleware");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
