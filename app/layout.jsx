@@ -26,15 +26,17 @@ export const NAVIGATION = [
         title: 'Add User',
         icon: <PersonIcon/>,
     },
-    {
-        segment: 'dashboard/export-pdf',
-        title: 'Export Medication History',
-        icon: <Article/>,
-    },
+    
     {
         segment: 'dashboard/view-user',
         title: 'View Users',
         icon: <SupervisorAccountIcon/>,
+    },
+    
+    {
+        segment: 'dashboard/export-pdf',
+        title: 'Export Medication History',
+        icon: <Article/>,
     }
 ];
 
