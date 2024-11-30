@@ -5,56 +5,85 @@ import Weekview from '../ui/weekview';
 //import { MedicalInformation } from '@mui/icons-material';
 
 
-export default async function Dashboard() {
+export default function Dashboard() {
     const supabase = createClient();
-    const { data: notes } = await supabase.from("notes").select();
+    //const { data: notes } = await supabase.from("notes").select();
 
     const [mysession, setMySession] = useState();
-    const [subprofiles, setSubprofiles] = useState([]);
-    const [medications, setMedications] = useState([]);
+    const [subprofileData, setSubprofileData] = useState([]);
+    const [medicationData, setMedicationData] = useState([]);
+    const [parentData, setParentData] = useState([]);
 
-    // Fetching primary and sub user profile data
+    // Fetching user and medication data
     useEffect(() => {
-        const fetchSessionSubprofilesMedications = async () => {
-            const { data: session } = await supabase.auth.getUser();
+        const fetchSessionUserandMedData = async () => {
+            const { data: session, error: sessionError } = await supabase.auth.getUser();
+
+            if (sessionError) {
+                console.error("Error fetching session:", sessionError);
+            }
             setMySession(session);
             
-            if (session) {
+            if (session?.user) {
                 // pulling user data from 'subprofiles' table in database
-                const { data: subprofileData, errorProf } = await supabase
+                const { data: subprofileData, error: errorProf } = await supabase
                     .from('subprofiles') 
-                    .select('id, first_name, last_name')
+                    //.select('id, first_name, last_name')
+                    .select()
                     .eq('uuid', session.user.id);
 
                 if (errorProf) {
                     console.error("Error fetching subprofiles:", errorProf);
                 } else {
-                    setSubprofiles(subprofileData);
+                    setSubprofileData(subprofileData || []);
                 }
 
                 // pulling medication data form 'medications' table in database
-                const { data: medicationData, errorMed } = await supabase
+                const { data: medicationData, error: errorMed } = await supabase
                     .from('medications')
-                    .select('id, name, dose')
+                    //.select('id, name, dose, medication_time')
+                    .select()
                     .eq('uuid', session.user.id);
 
                 if (errorMed) {
                     console.error("Error fetching medications:", errorMed);
                 } else {
-                    setMedications(medicationData);
+
+                    const formatMedDate = medicationData.map(med => ({
+                        ...med,
+                        medication_time: new Date(med.medication_time).toISOString().slice(0, -5),
+                    }));
+                    setMedicationData(formatMedDate);
+                    //setMedicationData(medicationData || []);
+                }
+
+                // pulling parent user data
+                const { data: parentData, error: parentError } = await supabase
+                    .from('user_data')
+                    .select()
+                    .eq('uuid', session.user.id);
+                
+                if (parentError) {
+                    console.error("Error fetching parent data:", parentError);
+                } else {
+                    setParentData(parentData);
                 }
             }
         };
 
-        fetchSessionSubprofilesMedications();
+        fetchSessionUserandMedData();
     }, []);
 
+    //console.log("Medication info: ", medications);
+    //console.log("User info: ", subprofiles);
 
     return (
         <div>
             <Weekview
-                profileInfo={subprofiles}
-                medicationInfo={medications}
+                // passing profile and medication data to weekview
+                parentInfo={parentData}
+                profileInfo={subprofileData}
+                medicationInfo={medicationData}
             />
         </div>
     );
