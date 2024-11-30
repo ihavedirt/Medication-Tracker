@@ -22,18 +22,33 @@ export async function login(provider, formData) {
 }
 
 export async function signup(provider, formData) {
-    const supabase = createClient()
+    const supabase = createClient();
 
+    console.log(formData);
     const data = {
-        email: formData.get('email'),
-        password: formData.get('password'),
+        email: formData.email,
+        password: formData.password,
+        options: {
+            data: {
+              phone: formData.phoneNumber,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+            },
+          }
     }
 
     const { error } = await supabase.auth.signUp(data)
 
     if (error) {
+        console.log(error);
         redirect('/error')
     }
+
+    await supabase.from("user_data").insert({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        phone: formData.phoneNumber
+    });
 
     revalidatePath('/dashboard', 'layout')
     redirect('/dashboard')
