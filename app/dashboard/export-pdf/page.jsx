@@ -35,13 +35,14 @@ import Checkbox from '@mui/material/Checkbox';
 export default function ExportMedicationHistory() {
     const supabase = createClient();
     const [open, setOpen] = React.useState(false);
-    const [age, setAge] = React.useState('');
-
+    const [parentFlag, setParentFlag] = React.useState(false);
     const handleChange = (event) => {
-        setAge(Number(event.target.value) || '');
         const { value } = event.target;
         const updatedSubprofiles = typeof value === 'string' ? value.split(',') : value;
         setSelectedSubprofiles(updatedSubprofiles);
+        const parentIds = parentData.map((parent) => parent.id);
+        const parentSelected = updatedSubprofiles.some((id) => parentIds.includes(id));
+        setParentFlag(parentSelected);
     };
 
     const handleClickOpen = () => {
@@ -155,7 +156,7 @@ export default function ExportMedicationHistory() {
 
     const renderMedicineTables = () => {
         const tables = [];
-        if(parentData.length > 0) {
+        if(parentFlag) {
             const parent = parentData[0];
             tables.push(
                 <TableContainer component={Paper} key={parent.uuid}>
