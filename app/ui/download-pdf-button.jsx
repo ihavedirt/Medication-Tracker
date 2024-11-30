@@ -35,7 +35,7 @@ export default function DownloadPDFButton({parentData, userData, medicineData}) 
 
     const handleDownload = () => {
         const doc = new jsPDF();
-        const colHeaders = ['Medication', 'Dosage', 'Quantity', 'Prescribed Date (YYYY-MM-DD)'];
+        const colHeaders = ['Medication', 'Medication Type', 'Dosage', 'Quantity', 'Prescribed Date (YYYY-MM-DD)'];
         const headerStyles = {
             fillColor: [240, 240, 240],
             textColor: [0],
@@ -70,8 +70,10 @@ export default function DownloadPDFButton({parentData, userData, medicineData}) 
                 const itemDetailsRows = parentMeds.map((med) => {
                     const formattedBirthDate = dayjs(med.medication_time).format('YYYY-MM-DD');
                     const dosageUnit = Object.keys(DosageUnit).find((key) => DosageUnit[key] === med.unit);
+                    const medType = Object.keys(MedType).find((key) => MedType[key] === med.type);
                     return [
-                        med.name.toString(),
+                        med.name,
+                        medType,
                         `${med.dose}${dosageUnit}`,
                         med.quantity,
                         formattedBirthDate.toString(),
