@@ -64,11 +64,9 @@ export default function Dashboard() {
                     const formattedMedications = medicationData.map(med => {
 
                         const subprofile = subprofileData.find(profile => profile.id === med.subprofile_id);
-                        console.log("subprofile:", subprofile);
                         const fullName = subprofile
                             ? `${subprofile.first_name} ${subprofile.last_name}`
-                            : `${parentData.first_name} ${parentData.last_name}`;
-                            console.log("fullname:", fullName);
+                            : `${parentData[0].first_name} ${parentData[0].last_name}`;
                         return {
                             ...med,
                             fullName,
@@ -84,9 +82,6 @@ export default function Dashboard() {
 
         fetchSessionUserandMedData();
     }, []);
-
-    //console.log("Medication info: ", medications);
-    //console.log("User info: ", subprofiles);
 
     return (
         <div>
