@@ -28,8 +28,9 @@ npm -v
 ```
 
 ## Installation
+#### Note: All steps must be completed in the directory where the Git repo is cloned
 
-1. Install node packages
+1. Install node package
 
 ```bash
 npm install
