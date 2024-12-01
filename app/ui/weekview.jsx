@@ -12,7 +12,7 @@ export default function Weekview({ parentInfo = [], subProfileInfo = [], medicat
     console.log("med info:", medicationInfo);
     console.log("sub info:", subProfileInfo);
     // Map medication info to calendar events
-    const events = useMemo(
+    /*const events = useMemo(
         () =>
             medicationInfo.map(med => {
                 //const name = med.suprofile_id == 0 ? (parentInfo[0].first_name + ' ' + parentInfo[0].last_name) : med.fullName;
@@ -22,7 +22,25 @@ export default function Weekview({ parentInfo = [], subProfileInfo = [], medicat
                 start: med.medication_time,
             }}),
         [medicationInfo]
-    );
+    );*/
+    const events = useMemo(() => {
+        const allEvents = [];
+
+        medicationInfo.forEach(med => {
+            const numTimesPerDay = med.frequency || 1;
+            const numIntervals = 24 / numTimesPerDay;
+            for (let i = 0; i < numTimesPerDay; i++) {
+                const newTime = dayjs(med.medication_time).add(i * numIntervals, 'hour');
+                const formatMedTime = newTime.format('HH:mm');
+                allEvents.push ({
+                    title: `${formatMedTime} ${med.fullName}: ${med.name}`,
+                    start: newTime.toISOString(),
+                });
+            }
+        });
+        console.log("all events:", allEvents);
+        return allEvents;
+    }, [medicationInfo]);
 
     return (
         <FullCalendar

@@ -67,7 +67,7 @@ export default function Dashboard() {
                         console.log("subprofile:", subprofile);
                         const fullName = subprofile
                             ? `${subprofile.first_name} ${subprofile.last_name}`
-                            : `${parentData[0].first_name} ${parentData[0].last_name}`;
+                            : `${parentData.first_name} ${parentData.last_name}`;
                             console.log("fullname:", fullName);
                         return {
                             ...med,
