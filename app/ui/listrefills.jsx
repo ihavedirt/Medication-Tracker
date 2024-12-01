@@ -22,12 +22,12 @@ export default function ListRefills({ parentInfo = [], subProfileInfo = [], medi
             [Frequency.THREE_DAILY]: 8,
             [Frequency.FOUR_DAILY]: 6,
             [Frequency.FIVE_MINUTES]: (1/(5*60)), // Convert 5 minutes to hours
-            [Frequency.WEEKLY]: 24 * 7, // 1 week in hours
-            [Frequency.MONTHLY]: 24 * 30, // Approximation: 30 days in a month
-            [Frequency.AS_NEEDED]: null, // No fixed interval
+            [Frequency.WEEKLY]: 24 * 7, 
+            [Frequency.MONTHLY]: 24 * 30, 
+            [Frequency.AS_NEEDED]: null, 
         };
     
-        return frequencyMap[frequency] ?? null; // Return null for undefined frequencies
+        return frequencyMap[frequency] ?? null;
     };
 
     const events = useMemo(() => {
@@ -36,7 +36,6 @@ export default function ListRefills({ parentInfo = [], subProfileInfo = [], medi
         medicationInfo.forEach(med => {
             const hoursToAdd = frequencyToHourDifference(med.frequency);
             const newTime = dayjs(med.medication_time).add(med.quantity * hoursToAdd, 'hour');
-            const formatMedTime = newTime.format('HH:mm');
             allEvents.push ({
                 title: `${med.fullName}: ${med.name}`,
                 start: newTime.format('dddd, MMMM D, YYYY'),
@@ -51,7 +50,7 @@ export default function ListRefills({ parentInfo = [], subProfileInfo = [], medi
                 Upcoming Refill Dates
             </Typography>
             <List>
-                {events.map((event, index) => (
+                {events?.map((event, index) => (
                     <ListItem key={index}>
                         <ListItemText primary={event.title} secondary={event.start} />
                     </ListItem>))}
