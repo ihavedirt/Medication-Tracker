@@ -2,6 +2,8 @@
 import { createClient } from '../../utils/supabase/client';
 import { useState, useEffect } from "react"
 import Weekview from '../ui/weekview';
+import ListRefills from '../ui/listrefills';
+import Grid from '@mui/material/Grid2';
 //import { MedicalInformation } from '@mui/icons-material';
 
 
@@ -86,7 +88,11 @@ export default function Dashboard() {
     return (
         <div>
             <Weekview
-                // passing profile and medication data to weekview
+                parentInfo={parentData}
+                subProfileInfo={subprofileData}
+                medicationInfo={medicationData}
+            />
+            <ListRefills
                 parentInfo={parentData}
                 subProfileInfo={subprofileData}
                 medicationInfo={medicationData}
