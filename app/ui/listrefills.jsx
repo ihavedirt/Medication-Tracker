@@ -21,7 +21,7 @@ export default function ListRefills({ parentInfo = [], subProfileInfo = [], medi
             [Frequency.TWICE_DAILY]: 12,
             [Frequency.THREE_DAILY]: 8,
             [Frequency.FOUR_DAILY]: 6,
-            [Frequency.FIVE_MINUTES]: (1/(5*60)), // Convert 5 minutes to hours
+            [Frequency.FIVE_MINUTES]: (1/(5*60)),
             [Frequency.WEEKLY]: 24 * 7, 
             [Frequency.MONTHLY]: 24 * 30, 
             [Frequency.AS_NEEDED]: null, 
