@@ -1,78 +1,52 @@
+
 'use client';
-import { useEffect, useRef } from 'react';
-import { Calendar } from '@fullcalendar/core'
-import dayGridPlugin from '@fullcalendar/daygrid'
+import React, { useMemo } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
 import dayjs from 'dayjs';
-//import '@fullcalendar/core/main.css';
-//import '@fullcalendar/daygrid/main.css';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-export default function Weekview({ profileInfo = [], medicationInfo = []}) {
+export default function Weekview({ parentInfo = [], subProfileInfo = [], medicationInfo = [] }) {
+    console.log("Med info:", medicationInfo);
 
-    console.log("Med info1:", medicationInfo);
-    const calendarRef = useRef(null);
-
-    /*useEffect(() => {
-
-        console.log("Med info2: ", medicationInfo);
-        if (calendarRef.current) {
-            const events = medicationInfo.map((med) => ({
-                title: med.name,//`${med.name} (${med.dose})`,
-                startDate: med_medication_time,//dayjs(med.medication_time).toISOString(),
-                //title: "Test",
-            }));
-
-            console.log(events);
-
-            console.log("Med info3:", medicationInfo);
-            // const events = [
-            //     {
-            //         title: "Testing outputs",
-            //         date: "2024-11-28T10:00",
-
-            //     },
-            // ];
-
-
-            const calendar = new Calendar(calendarRef.current, {
-                plugins: [dayGridPlugin],
-                initialView: 'dayGridWeek',
-                headerToolbar: {
-                    left: 'prev,next',
-                    center: 'title',
-                    right: 'dayGridWeek',
-                },
-                events,
-            });
-
-            calendar.render();
-        }
-    }, []);*/
-    useEffect(() => {
-        if (calendarRef.current) {
-            const calendar = new Calendar(calendarRef.current, {
-                plugins: [dayGridPlugin],
-                initialView: 'dayGridWeek',
-                headerToolbar: {
-                    left: 'prev,next',
-                    center: 'title',
-                    right: 'dayGridWeek'
-                },
-
-                events: medicationInfo.map(med => ({
-                    title: med.name, 
-                    start: med.medication_time,
-                })),
-
-            });
-    
-            calendar.render();
-        }
-    }, [medicationInfo]);
-
-    console.log("Med info4:", medicationInfo);
-    
-    return (
-        <div ref={calendarRef}></div>
+    // Map medication info to calendar events
+    const events = useMemo(
+        () =>
+            medicationInfo.map(med => {
+                const formatMedTime = dayjs(med.medication_time).format('HH:mm');
+                return {
+                title: `${formatMedTime} ${med.fullName}: ${med.name}`,
+                start: med.medication_time,
+            }}),
+        [medicationInfo]
     );
 
+    return (
+        <FullCalendar
+            plugins={[dayGridPlugin]}
+            initialView="dayGridWeek"
+            headerToolbar={{
+                left: 'prev,next',
+                center: 'title',
+                right: 'dayGridWeek,dayGridDay',
+            }}
+            events={events}
+            eventContent={(eventInfo) => (
+                <div
+                    style={{
+                        whiteSpace: 'normal',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        fontSize: '12px',
+                        lineHeight: '1.2',
+                    }}
+                >
+                    {eventInfo.event.title}
+                    {/* <div>{eventInfo.event.start}</div> */}
+                </div>
+            )}
+            //height="auto"
+        />
+    );
 }

@@ -49,12 +49,22 @@ export default function Dashboard() {
                     console.error("Error fetching medications:", errorMed);
                 } else {
 
-                    const formatMedDate = medicationData.map(med => ({
-                        ...med,
-                        medication_time: new Date(med.medication_time).toISOString().slice(0, -5),
-                    }));
-                    setMedicationData(formatMedDate);
-                    //setMedicationData(medicationData || []);
+                    const formattedMedications = medicationData.map(med => {
+
+                        const subprofile = subprofileData.find(profile => profile.id === med.subprofile_id);
+                        console.log("subprofile:", subprofile);
+                        const fullName = subprofile
+                            ? `${subprofile.first_name} ${subprofile.last_name}`
+                            : "Unknown User";
+                            console.log("fullname:", fullName);
+                        return {
+                            ...med,
+                            fullName,
+                            medication_time: new Date(med.medication_time)//.toISOString().slice(0, -5), 
+                        };
+                    });
+    
+                    setMedicationData(formattedMedications);
                 }
 
                 // pulling parent user data
@@ -82,7 +92,7 @@ export default function Dashboard() {
             <Weekview
                 // passing profile and medication data to weekview
                 parentInfo={parentData}
-                profileInfo={subprofileData}
+                subProfileInfo={subprofileData}
                 medicationInfo={medicationData}
             />
         </div>
