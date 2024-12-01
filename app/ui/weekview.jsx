@@ -8,12 +8,14 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 
 export default function Weekview({ parentInfo = [], subProfileInfo = [], medicationInfo = [] }) {
-    console.log("Med info:", medicationInfo);
-
+    console.log("parent info:", parentInfo);
+    console.log("med info:", medicationInfo);
+    console.log("sub info:", subProfileInfo);
     // Map medication info to calendar events
     const events = useMemo(
         () =>
             medicationInfo.map(med => {
+                //const name = med.suprofile_id == 0 ? (parentInfo[0].first_name + ' ' + parentInfo[0].last_name) : med.fullName;
                 const formatMedTime = dayjs(med.medication_time).format('HH:mm');
                 return {
                 title: `${formatMedTime} ${med.fullName}: ${med.name}`,

@@ -38,6 +38,18 @@ export default function Dashboard() {
                     setSubprofileData(subprofileData || []);
                 }
 
+                // pulling parent user data
+                const { data: parentData, error: parentError } = await supabase
+                    .from('user_data')
+                    .select()
+                    .eq('uuid', session.user.id);
+                
+                if (parentError) {
+                    console.error("Error fetching parent data:", parentError);
+                } else {
+                    setParentData(parentData);
+                }
+
                 // pulling medication data form 'medications' table in database
                 const { data: medicationData, error: errorMed } = await supabase
                     .from('medications')
@@ -55,7 +67,7 @@ export default function Dashboard() {
                         console.log("subprofile:", subprofile);
                         const fullName = subprofile
                             ? `${subprofile.first_name} ${subprofile.last_name}`
-                            : "Unknown User";
+                            : `${parentData[0].first_name} ${parentData[0].last_name}`;
                             console.log("fullname:", fullName);
                         return {
                             ...med,
@@ -67,17 +79,6 @@ export default function Dashboard() {
                     setMedicationData(formattedMedications);
                 }
 
-                // pulling parent user data
-                const { data: parentData, error: parentError } = await supabase
-                    .from('user_data')
-                    .select()
-                    .eq('uuid', session.user.id);
-                
-                if (parentError) {
-                    console.error("Error fetching parent data:", parentError);
-                } else {
-                    setParentData(parentData);
-                }
             }
         };
 
