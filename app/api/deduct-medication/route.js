@@ -102,7 +102,17 @@ export async function POST(req, res) {
                         .update({ quantity: newQuantity, medication_time: newMedTime.toISOString()})
                         .eq('id', med.id)
 
-                  if (newQuantity === null) {
+                if(newQuantity != null) {
+                    client.messages
+                        .create({
+                        body: `Hey! It's time to take ${med.name}.`,
+                        from: '+17753209715',
+                        to: '+1' + user.phone 
+                    })
+                }
+
+                
+                if (newQuantity === null) {
                         medicationsProcessed.push({
                             uuid,
                             name: med.name,
@@ -136,7 +146,7 @@ export async function POST(req, res) {
 
                     client.messages
                         .create({
-                        body: `Hey sussybaka, only ${newQuantity} pills of ${med.name} left. Keep your health on track by restocking soon!`,
+                        body: `Hey! Only ${newQuantity} pills of ${med.name} left. Keep your health on track by restocking soon!`,
                         from: '+17753209715',
                         to: '+1' + user.phone 
                     })
