@@ -102,7 +102,7 @@ export async function POST(req, res) {
                         .update({ quantity: newQuantity, medication_time: newMedTime.toISOString()})
                         .eq('id', med.id)
 
-                if(newQuantity != null) {
+                if(newQuantity != null && newQuantity != 0) {
                     client.messages
                         .create({
                         body: `Hey! It's time to take ${med.name}.`,
