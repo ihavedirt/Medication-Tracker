@@ -2,8 +2,7 @@
 import { createClient } from '../../utils/supabase/client';
 import { useState, useEffect } from "react"
 import Weekview from '../ui/weekview';
-//import { MedicalInformation } from '@mui/icons-material';
-
+import ListRefills from '../ui/listrefills';
 
 export default function Dashboard() {
     const supabase = createClient();
@@ -53,7 +52,6 @@ export default function Dashboard() {
                 // pulling medication data form 'medications' table in database
                 const { data: medicationData, error: errorMed } = await supabase
                     .from('medications')
-                    //.select('id, name, dose, medication_time')
                     .select()
                     .eq('uuid', session.user.id);
 
@@ -70,7 +68,7 @@ export default function Dashboard() {
                         return {
                             ...med,
                             fullName,
-                            medication_time: new Date(med.medication_time)//.toISOString().slice(0, -5), 
+                            medication_time: new Date(med.medication_time) 
                         };
                     });
     
@@ -84,13 +82,21 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <div>
-            <Weekview
-                // passing profile and medication data to weekview
-                parentInfo={parentData}
-                subProfileInfo={subprofileData}
-                medicationInfo={medicationData}
-            />
+        <div style={{ display: 'flex', width: '100%', height: '100vh' }}>
+            <div style={{ flex: 8, padding: '10px' }}>
+                <Weekview
+                    parentInfo={parentData}
+                    subProfileInfo={subprofileData}
+                    medicationInfo={medicationData}
+                />
+            </div>
+            <div style={{ flex: 2, padding: '10px' }}>
+                <ListRefills
+                    parentInfo={parentData}
+                    subProfileInfo={subprofileData}
+                    medicationInfo={medicationData}
+                />
+            </div>
         </div>
     );
 }
