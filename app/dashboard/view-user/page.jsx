@@ -40,7 +40,7 @@ export default function Page() {
         "Twice Daily": 1,
         "Three Daily": 2,
         "Four Daily": 3,
-        "Every 6 Hours": 4,
+        "Every 5 Minutes": 4,
         "Every 8 Hours": 5,
         "Every 12 Hours": 7,
         "Weekly": 8,

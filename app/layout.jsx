@@ -6,7 +6,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import Image from 'next/image';
 import * as React from "react";
-import {Dashboard} from "@mui/icons-material";
+import {Article, Dashboard} from "@mui/icons-material";
 import {LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -26,10 +26,17 @@ export const NAVIGATION = [
         title: 'Add User',
         icon: <PersonIcon/>,
     },
+    
     {
         segment: 'dashboard/view-user',
         title: 'View Users',
         icon: <SupervisorAccountIcon/>,
+    },
+    
+    {
+        segment: 'dashboard/export-pdf',
+        title: 'Export Medication History',
+        icon: <Article/>,
     }
 ];
 

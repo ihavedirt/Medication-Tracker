@@ -43,9 +43,7 @@ export default function Page() {
         TWICE_DAILY: 1,
         THREE_DAILY: 2,
         FOUR_DAILY: 3,
-        EVERY_6: 4,
-        EVERY_8: 5,
-        EVERY_12: 7,
+        FIVE_MINUTES: 4,
         WEEKLY: 8,
         MONTHLY: 9,
         AS_NEEDED: 10,
@@ -53,14 +51,15 @@ export default function Page() {
 
     const formDefault = {
         name: '',
-        doseage: 0,
+        doseage: null,
         unit: DosageUnit.MG,
         type: MedType.PILL,
         frequency: Frequency.ONCE_DAILY,
         time: dayjs(),
         subprofileId: '',
         subprofileFirstName: '',
-        subprofileLastName: ''
+        subprofileLastName: '',
+        quantity: null
     };
 
     const errorDefault = {
@@ -72,7 +71,8 @@ export default function Page() {
         time: false,
         subprofileId: false,
         subprofileFirstName: false,
-        subprofileLastName: false
+        subprofileLastName: false,
+        quantity: false
     };
 
     const [formData, setFormData] = useState(formDefault);
@@ -120,9 +120,10 @@ export default function Page() {
         const newErrorData = {
             name: formData.name === '',
             doseage: !Number.isFinite(Number(formData.doseage)) || formData.doseage <= 0,
+            quantity: formData.quantity  === null 
         };
     
-        if (newErrorData.name || newErrorData.doseage) {
+        if (newErrorData.name || newErrorData.doseage || newErrorData.quantity) {
             setErrorData({
                 ...errorData,
                 ...newErrorData,
@@ -145,6 +146,7 @@ export default function Page() {
             type: formData.type,
             frequency: formData.frequency,
             medication_time: formData.time.toISOString(),
+            quantity: formData.quantity
         });
         setLoading(false);
 
@@ -222,12 +224,25 @@ export default function Page() {
                 </Grid>
             </Grid>
             <Grid container spacing={1}>
+                <Grid xs={6}>
+                    <TextField
+                            error={errorData.quantity}
+                            label="Quantity"
+                            variant="filled"
+                            value={formData.quantity || ''}
+                            onChange={handleChange('quantity')}
+                            fullWidth
+                            helperText="A quantity is required"
+                    />
+                </Grid>
+            </Grid>
+            <Grid container spacing={1}>
                 <Grid xs={12}>
                     <TextField
                             error={errorData.doseage}
                             label="Doseage"
                             variant="filled"
-                            value={formData.doseage}
+                            value={formData.doseage || ''}
                             onChange={handleChange('doseage')}
                             fullWidth
                             helperText="A dosage is required"
@@ -242,23 +257,21 @@ export default function Page() {
                         { label: 'kg', value: DosageUnit.KG },
                     ])}
                 </Grid>
-            </Grid>
-            <Grid container spacing={1}>
                 <Grid xs={12}>
                     {renderSelectField('Frequency', formData.frequency, handleChange('frequency'), [
                         { label: 'Once Daily', value: Frequency.ONCE_DAILY },
                         { label: 'Twice Daily', value: Frequency.TWICE_DAILY },
                         { label: 'Three Times Daily', value: Frequency.THREE_DAILY },
                         { label: 'Four Times Daily', value: Frequency.FOUR_DAILY },
-                        { label: 'Every 6 Hours', value: Frequency.EVERY_6 },
-                        { label: 'Every 8 Hours', value: Frequency.EVERY_8 },
-                        { label: 'Every 12 Hours', value: Frequency.EVERY_12 },
+                        { label: 'Every 5 Minutes', value: Frequency.FIVE_MINUTES },
                         { label: 'Weekly', value: Frequency.WEEKLY },
                         { label: 'Monthly', value: Frequency.MONTHLY },
                         { label: 'As Needed', value: Frequency.AS_NEEDED },
                     ])}
                 </Grid>
-                {formData.frequency != Frequency.AS_NEEDED ? 
+            </Grid>
+            <Grid container spacing={1}>
+            {formData.frequency != Frequency.AS_NEEDED ? 
                     <Grid xs={12}>
                         <TimePicker
                             label="Medication time"

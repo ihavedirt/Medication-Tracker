@@ -173,7 +173,6 @@ export default function Page() {
                     {snackbarSev.message}
                 </Alert>
             </Snackbar>
-            
         </Stack>
     );
 }
